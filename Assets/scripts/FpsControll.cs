@@ -4,7 +4,14 @@ using UnityEngine;
 
 public class FpsControll : MonoBehaviour
 {
+    public float gravity = -9.81f;
     public Controlle Controlle;
+    public CharacterController controlle;
+    public Vector2 velocity;
+    public Transform orientacao;
+    public bool IsGrounded;
+    public float movespeed = 5f;
+
     private void Awake()
     {
         Controlle = new Controlle();
@@ -13,6 +20,8 @@ public class FpsControll : MonoBehaviour
     {
         Controlle.Enable();
         Controlle.Player.Jump.performed += ctx => Jump();
+        Controlle.Player.Move.performed += ctx => velocity = ctx.ReadValue<Vector2>();
+        Controlle.Player.Move.canceled += ctx => velocity = Vector3.zero;
 
     }    
     private void OnDisable() {
@@ -20,9 +29,12 @@ public class FpsControll : MonoBehaviour
     }
     public void Jump()
     {
-        Debug.Log("OIIII");
     }
-    
+    public void Move()
+    {
+        Vector3 direcao = orientacao.forward * velocity.y + orientacao.right * velocity.x;
+        controlle.Move(direcao * movespeed * Time.deltaTime);
+    }
 
     void Start()
     {
@@ -30,6 +42,7 @@ public class FpsControll : MonoBehaviour
     }
     void Update()
     {
-        }
+        Move();
+    }
     
 }
