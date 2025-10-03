@@ -11,7 +11,7 @@ public class FpsControll : MonoBehaviour
     public Transform orientacao;
     public bool IsGrounded;
     public float movespeed = 5f;
-
+    
     private void Awake()
     {
         Controlle = new Controlle();
@@ -22,6 +22,7 @@ public class FpsControll : MonoBehaviour
         Controlle.Player.Jump.performed += ctx => Jump();
         Controlle.Player.Move.performed += ctx => velocity = ctx.ReadValue<Vector2>();
         Controlle.Player.Move.canceled += ctx => velocity = Vector3.zero;
+        
 
     }    
     private void OnDisable() {
@@ -30,6 +31,8 @@ public class FpsControll : MonoBehaviour
     public void Jump()
     {
     }
+
+  
     public void Move()
     {
         Vector3 direcao = orientacao.forward * velocity.y + orientacao.right * velocity.x;
