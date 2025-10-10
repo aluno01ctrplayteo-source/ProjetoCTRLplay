@@ -19,5 +19,10 @@ public class CurrencyManager : MonoBehaviour
             currency++;
             display.text = $"Coins -> {currency}";
         }
+        if (other.CompareTag("Healer"))
+        {
+            Destroy(other.gameObject);
+            GameManager.instance.healthManager.HpChanger(20);
+        }
     }
 }

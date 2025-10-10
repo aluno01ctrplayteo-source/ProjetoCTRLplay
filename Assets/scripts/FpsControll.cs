@@ -25,7 +25,7 @@ public class FpsControll : MonoBehaviour
         ControllerInputs.Player.Jump.performed += ctx => Jump();
         ControllerInputs.Player.Move.performed += ctx => velocity = ctx.ReadValue<Vector2>();
         ControllerInputs.Player.Move.canceled += ctx => velocity = Vector2.zero;
-        
+        ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.isGamePaused();
 
     }    
     private void OnDisable() {

@@ -8,25 +8,22 @@ public class HealthManager : MonoBehaviour
 {
     public int health = 100;
     public Slider hpBar;
-    public int damage;
     public int maxHealth = 100;
     public int minHealth = 0;
-    public Button takeDamage;
 
     private void Start()
     {
         hpBar.value = health;
-        InvokeRepeating("TakeDamage", 5f, 5f);
     }
 
     private void Update()
     {
         
     }
-    public void TakeDamage()
+    public void HpChanger(int amount)
     {
         Mathf.Clamp(health, minHealth, maxHealth);
-        health += damage;
+        health += amount;
         hpBar.value = health;
     }
 
