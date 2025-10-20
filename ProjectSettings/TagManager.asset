@@ -8,11 +8,12 @@ TagManager:
   - Floor
   - Coin
   - Healer
+  - Ground
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 

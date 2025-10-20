@@ -2262,13 +2262,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cb6b0b8224869249990dd761d14640f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravity: -9.81
-  charController: {fileID: 2082265819}
-  velocity: {x: 0, y: 0}
+  moveSpeed: 5
   orientation: {fileID: 1256711274}
-  movespeed: 5
+  velocity: {x: 0, y: 0}
+  gravity: -9.81
+  jumpForce: 2
   verticalVelocity: 0
   isGrounded: 0
+  groundCheckDistance: 0.3
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  charController: {fileID: 2082265819}
   playerAnimations: {fileID: 5866666021551273384}
 --- !u!114 &2082265821
 MonoBehaviour:
@@ -3610,7 +3615,7 @@ GameObject:
   - component: {fileID: 1607021913637203275}
   - component: {fileID: 5638874407556775094}
   - component: {fileID: 722287582}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cavern
   m_TagString: Untagged
   m_Icon: {fileID: 0}
