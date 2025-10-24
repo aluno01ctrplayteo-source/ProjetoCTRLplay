@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,6 +10,8 @@ public class GameManager : MonoBehaviour
     public HealthManager healthManager;
     public bool isPaused;
     public GameObject pauseMenu;
+    public int currency = 0;
+    public TMP_Text display;
     void Awake()
     {
         if (instance == null)
@@ -25,6 +28,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         healthManager.HpChanger(-50);
+        display.text = $"Coins -> {currency}";  
     }
     public void isGamePaused()
     {
@@ -49,4 +53,9 @@ public class GameManager : MonoBehaviour
         isGamePaused();
     }
 }
+public interface IInteracted
+{
+    void Interacted();
+}
+
 // Brackeys

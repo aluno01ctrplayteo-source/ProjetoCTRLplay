@@ -9,6 +9,7 @@ TagManager:
   - Coin
   - Healer
   - Ground
+  - Item
   layers:
   - Default
   - TransparentFX
