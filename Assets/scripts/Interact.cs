@@ -47,7 +47,7 @@ public class Interact : MonoBehaviour
             }
             if (hit.transform.gameObject.GetComponent<ItemData>() != null && Input.GetKeyDown(KeyCode.E))
             {
-                item = hit.transform.gameObject.GetComponent<ItemData>().myData;
+                item = hit.transform.gameObject.GetComponent<ItemData>().item;
             }
         }
     }
