@@ -4,11 +4,12 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 using System.Runtime.CompilerServices;
+using System;
 public class Interact : MonoBehaviour
 {
     GameManager gameManager;
     Controlle controllerInputs;
-
+    public Items item;
     private void Start()
     {
         controllerInputs = new Controlle();
@@ -27,12 +28,28 @@ public class Interact : MonoBehaviour
             Item item = other.GetComponent<Item>();
             if (Input.GetKeyDown(KeyCode.E) && item != null)
             {
-               item.Interacted();
+                item.Interacted();
             }
-            
+
         }
 
-        
+
+    }
+    void Update()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
+        {
+            if (hit.transform.gameObject.GetComponent<Door>() != null && Input.GetKeyDown(KeyCode.E))
+            {
+                Door door = hit.transform.gameObject.GetComponent<Door>();
+                door.Interacted();
+            }
+            if (hit.transform.gameObject.GetComponent<ItemData>() != null && Input.GetKeyDown(KeyCode.E))
+            {
+                item = hit.transform.gameObject.GetComponent<ItemData>().myData;
+            }
+        }
     }
     private void OnTriggerEnter(Collider other)
     {
