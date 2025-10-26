@@ -5,49 +5,39 @@ using UnityEngine;
 using TMPro;
 using System.Runtime.CompilerServices;
 using System;
+using JetBrains.Annotations;
 public class Interact : MonoBehaviour
 {
     GameManager gameManager;
     Controlle controllerInputs;
-    public Items item;
-    private void Start()
+    public float interactDistance = 3f;
+
+    private void Awake()
     {
-        controllerInputs = new Controlle();
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        controllerInputs = new Controlle(); // Instantiate the Controlle input actions
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>(); // Get reference to GameManager
     }
-
-    private void OnTriggerStay(Collider other)
+    private void OnEnable()
     {
-        if (other.CompareTag("Healer"))
-        {
-            Destroy(other.gameObject);
-            gameManager.healthManager.HpChanger(20);
-        }
-        if (other.CompareTag("Item"))
-        {
-            Item item = other.GetComponent<Item>();
-            if (Input.GetKeyDown(KeyCode.E) && item != null)
-            {
-                item.Interacted();
-            }
-
-        }
-
-
+        controllerInputs.Enable(); // Enable the input action map
+    }
+    private void OnDisable()
+    {
+        controllerInputs.Disable(); // Disable the input action map
     }
     void Update()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, interactDistance)) // Cast a ray from the camera forward
         {
-            if (hit.transform.gameObject.GetComponent<Door>() != null && Input.GetKeyDown(KeyCode.E))
+            if (hit.transform.gameObject.GetComponent<Door>() != null && controllerInputs.Player.Interaction.WasPressedThisFrame() == true)
             {
                 Door door = hit.transform.gameObject.GetComponent<Door>();
                 door.Interacted();
             }
-            if (hit.transform.gameObject.GetComponent<ItemData>() != null && Input.GetKeyDown(KeyCode.E))
+            if (hit.transform.gameObject.GetComponent<ItemData>() != null && controllerInputs.Player.Interaction.WasPressedThisFrame() == true)
             {
-                item = hit.transform.gameObject.GetComponent<ItemData>().item;
+                ItemData itemData = hit.transform.gameObject.GetComponent<ItemData>();
+                itemData.Interacted();
             }
         }
     }
@@ -57,7 +47,13 @@ public class Interact : MonoBehaviour
         {
             Destroy(other.gameObject);
             gameManager.currency++;
-            gameManager.display.text = $"Coins -> {gameManager.currency}";
+            gameManager.coinDisplay.text = $"Coins -> {gameManager.currency}";
+        }
+        if (other.CompareTag("Healer"))
+        {
+            Destroy(other.gameObject);
+            gameManager.healthManager.HpChanger(20);
         }
     }
+    
 }

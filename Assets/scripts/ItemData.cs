@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class ItemData : MonoBehaviour, IInteracted
 {
-    public Items item;
+    public Item item; // Reference to the Item scriptable object
 
-    public void Interacted()
+    public void Interacted() 
     {
-        Destroy(this.gameObject);
+        Inventory inventory = GameObject.FindAnyObjectByType<Inventory>();
+        if (inventory != null) // Check if the inventory instance exists
+        {
+            inventory.AddItem(item);
+            inventory.ListItems();
+            Destroy(gameObject);
+        }
     }
 }

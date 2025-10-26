@@ -33,7 +33,8 @@ public class FpsControll : MonoBehaviour
         ControllerInputs.Player.Jump.performed += ctx => Jump(); // Ao disparar o evento 'Jump.performed', chama o método Jump()
         ControllerInputs.Player.Move.performed += ctx => velocity = ctx.ReadValue<Vector2>(); // Ao movimentar, lê o Vector2 (input) e armazena em 'velocity'
         ControllerInputs.Player.Move.canceled += ctx => velocity = Vector2.zero; // Quando o input de movimento é cancelado (soltou a tecla/joystick), zera a velocidade
-        ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.isGamePaused(); // Ao apertar Pause, chama o método no GameManager (possivelmente alterna pausa)
+        ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.IsGamePaused(); // Ao apertar Pause, chama o método no GameManager (possivelmente alterna pausa)
+        ControllerInputs.Player.Inventory.performed += ctx => GameManager.instance.IsInventoryOpen(); // Ao apertar Inventory, chama o método no GameManager (possivelmente abre/fecha inventário)
     } 
 
     private void OnDisable()

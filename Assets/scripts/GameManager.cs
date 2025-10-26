@@ -11,7 +11,9 @@ public class GameManager : MonoBehaviour
     public bool isPaused;
     public GameObject pauseMenu;
     public int currency = 0;
-    public TMP_Text display;
+    public TMP_Text coinDisplay;
+    public GameObject inventoryMenu;
+
     void Awake()
     {
         if (instance == null)
@@ -28,9 +30,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         healthManager.HpChanger(-50);
-        display.text = $"Coins -> {currency}";  
+        coinDisplay.text = $"Coins -> {currency}";  
+        pauseMenu.SetActive(false);
+        inventoryMenu.SetActive(false);
     }
-    public void isGamePaused()
+    public void IsGamePaused()
     {
         isPaused = !isPaused;
         if (isPaused)
@@ -44,13 +48,25 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
         }
     }
+    public void IsInventoryOpen()
+    {
+        inventoryMenu.SetActive(!inventoryMenu.activeSelf);
+        if (inventoryMenu.activeSelf)
+        {
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
+    }
     public void Quit()
     {
         Application.Quit();
     }
     public void Continue()
     {
-        isGamePaused();
+        IsGamePaused();
     }
 }
 public interface IInteracted
