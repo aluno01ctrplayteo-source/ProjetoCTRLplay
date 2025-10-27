@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using static UnityEditor.Progress;
 
 public class Inventory : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class Inventory : MonoBehaviour
         if (instance != null) // Ensure only one instance exists
         {
             Debug.LogWarning("More than one instance of Inventory found!");
-            return;
+            Destroy(this);
         }
         instance = this; // Assign singleton instance
     }
@@ -31,6 +32,10 @@ public class Inventory : MonoBehaviour
     }
     public void ListItems()
     {
+        foreach (Transform child in itemContent) // Clear existing UI elements
+        {
+            Destroy(child.gameObject);
+        }
         foreach (Item item in inventory) // Iterate through each item in the inventory
         {
             GameObject obj = Instantiate(inventoryItem, itemContent); // Instantiate UI element for the item
@@ -38,7 +43,6 @@ public class Inventory : MonoBehaviour
             Image itemIcon = obj.transform.Find("ItemImage").GetComponent<Image>(); //  Get reference to the item icon image component
             itemName.text = item.itemName; // Set the item name text
             itemIcon.sprite = item.itemIcon; // Set the item icon image
-            // Issue: This will create duplicate UI elements each time ListItems is called.
         }
     }
 }
