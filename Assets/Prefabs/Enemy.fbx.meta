@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Dirt&Rock
-    second: {fileID: 2100000, guid: eac8992eca5a0234ba309a62c313284d, type: 2}
+    second: {fileID: 2100000, guid: 19ae2a02e4b504043bf0043b43d32ec9, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

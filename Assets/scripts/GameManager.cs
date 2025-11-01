@@ -7,11 +7,13 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    public HealthManager healthManager;
+    public PlayerHealthManager healthManager;
     public bool isPaused;
     public GameObject pauseMenu;
     public int currency = 0;
     public TMP_Text coinDisplay;
+    public List<Enemy> enemies;
+    public GameObject gameOverMenu;
     public GameObject inventoryMenu;
 
     void Awake()
@@ -25,11 +27,27 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        healthManager = FindAnyObjectByType<HealthManager>();
+        healthManager = FindAnyObjectByType<PlayerHealthManager>();
     }
+
+    private void Update()
+    {
+        enemies = new List<Enemy>(FindObjectsOfType<Enemy>());
+    }
+
+    public void GameOver()
+    {
+        gameOverMenu.SetActive(true);
+    }
+
+    public void ReloadLevel()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     void Start()
     {
-        healthManager.HpChanger(-50);
         coinDisplay.text = $"Coins -> {currency}";  
         pauseMenu.SetActive(false);
         inventoryMenu.SetActive(false);
@@ -50,13 +68,15 @@ public class GameManager : MonoBehaviour
     }
     public void IsInventoryOpen()
     {
-        inventoryMenu.SetActive(!inventoryMenu.activeSelf);
-        if (inventoryMenu.activeSelf)
+        isPaused = !isPaused;
+        if (isPaused)
         {
+            inventoryMenu.SetActive(true);
             Time.timeScale = 0f;
         }
         else
         {
+            inventoryMenu.SetActive(false);
             Time.timeScale = 1f;
         }
     }

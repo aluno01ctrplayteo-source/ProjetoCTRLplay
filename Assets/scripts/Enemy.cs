@@ -4,14 +4,24 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public float verticalVelocity; 
-    public bool isGrounded;
-    CharacterController controller;
-    public Transform orientation;
+    [Header("Movement")]
     public float moveSpeed = 3f;
-    float gravity = -9.81f;
-    int damage = 15;
-    GameManager gameManager;
+    public Transform orientation;
+    public bool isGrounded;
+
+    [Header("Jump & Gravity")]
+    public float verticalVelocity;     
+    public float gravity = -9.81f;
+
+    [Header("Combat system")]
+    public int damage = 15;
+    public int health = 100;
+    public int maxHealth = 100;
+    public int minHealth = 0;
+
+    [Header("Components")]
+    public static GameManager gameManager;
+    public static CharacterController controller;
 
     private void Awake()
     {
@@ -20,17 +30,44 @@ public class Enemy : MonoBehaviour
     }
     private void Start()
     {
-        //InvokeRepeating("DealDamage", 2f, 2f);
+        InvokeRepeating(nameof(DealDamage), 2f, 2f);
     }
 
-    /*public void DealDamage(int amount)
+    public void DealDamage()
     {
-        RaycastHit hit;
-        if (Physics.CheckBox(transform.position + Vector3.forward * 3, new Vector3(0.5f, 1f, 0.5f), Quaternion.identity, LayerMask.GetMask("Player")))
+        if (CheckHitBox("Player")) gameManager.healthManager.HpChanger(-damage);
+    }
+
+    public bool CheckHitBox(string tag)
+    {
+        Collider[] hitColliders = Physics.OverlapBox(transform.position + transform.forward * 1 , Vector3.one * 1f, transform.localRotation);
+        foreach (var collider in hitColliders)
         {
-            gameManager.healthManager.HpChanger(-damage);
+            if (collider.gameObject == this.gameObject) continue;
+            if (collider.CompareTag(tag)) return true;
         }
-    }*/
+        return false;
+    }
+
+    public void TakeDamage(int change)
+    {
+        health += change;
+        health = Mathf.Clamp(health, minHealth, maxHealth);
+        Debug.Log($"Enemy Health: {health}");
+        Death();
+    }   
+
+    public void Death()
+    {
+        if (health > minHealth) return;
+        Destroy(this.gameObject);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(transform.position + transform.forward * 1, Vector3.one * 1f);
+    }
 
     private void Move()
     {
@@ -41,6 +78,7 @@ public class Enemy : MonoBehaviour
     }
     void Update()
     {
+        isGrounded = controller.isGrounded;
         ApplyGravity();
         Move();
     }

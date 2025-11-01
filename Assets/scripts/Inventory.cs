@@ -17,7 +17,6 @@ public class Inventory : MonoBehaviour
         DontDestroyOnLoad(gameObject); // Persist inventory across scenes
         if (instance != null) // Ensure only one instance exists
         {
-            Debug.LogWarning("More than one instance of Inventory found!");
             Destroy(this);
         }
         instance = this; // Assign singleton instance

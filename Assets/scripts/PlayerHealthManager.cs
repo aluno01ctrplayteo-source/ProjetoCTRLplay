@@ -4,8 +4,9 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class HealthManager : MonoBehaviour
+public class PlayerHealthManager : MonoBehaviour
 {
+    [Header("Health Manager")]
     public int health = 100;
     public Slider hpBar;
     public int maxHealth = 100;
@@ -18,12 +19,16 @@ public class HealthManager : MonoBehaviour
 
     private void Update()
     {
-        
+        if (health <= minHealth)
+        {
+            Debug.Log("Game Over");
+            GameManager.instance.GameOver();
+        }
     }
     public void HpChanger(int amount)
     {
-        Mathf.Clamp(health, minHealth, maxHealth);
         health += amount;
+        health = Mathf.Clamp(health, minHealth, maxHealth);
         hpBar.value = health;
     }
 

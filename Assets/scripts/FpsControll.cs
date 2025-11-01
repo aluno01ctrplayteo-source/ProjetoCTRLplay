@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FpsControll : MonoBehaviour
@@ -22,6 +23,11 @@ public class FpsControll : MonoBehaviour
     public Animator playerAnimations; // Referência ao Animator (não usado no script atual, mas preparado)
     public Controlle ControllerInputs; // Instância da classe gerada pelo Input System (nomenclatura 'Controlle' parece ser nome customizado)
 
+    [Header("Combate")]
+    public int damageAmount; // Dano causado por ataque
+    public float attackCooldown = 1f; // Tempo de recarga entre ataques
+    bool canAttack = true; // Flag para controlar se o jogador pode atacar
+
     private void Awake() 
     {
         ControllerInputs = new Controlle(); // Instancia o objeto de Input Actions (geralmente gerado pelo novo Input System)
@@ -35,6 +41,7 @@ public class FpsControll : MonoBehaviour
         ControllerInputs.Player.Move.canceled += ctx => velocity = Vector2.zero; // Quando o input de movimento é cancelado (soltou a tecla/joystick), zera a velocidade
         ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.IsGamePaused(); // Ao apertar Pause, chama o método no GameManager (possivelmente alterna pausa)
         ControllerInputs.Player.Inventory.performed += ctx => GameManager.instance.IsInventoryOpen(); // Ao apertar Inventory, chama o método no GameManager (possivelmente abre/fecha inventário)
+        ControllerInputs.Player.Attack.performed += ctx => Attack() ; // Ao apertar Attack, chama o método Attack no playerCombat do GameManager
     } 
 
     private void OnDisable()
@@ -62,8 +69,23 @@ public class FpsControll : MonoBehaviour
         // Monta o vetor final de movimento: direção horizontal multiplicada por moveSpeed + componente vertical
         Vector3 move = direction * moveSpeed + Vector3.up * verticalVelocity;
         charController.Move(move * Time.deltaTime); // Move o CharacterController (leva em conta colisões); multiplicado por deltaTime para ser frame-rate independent
-    } 
+    }
 
+    public void Attack() // Método de ataque que causa dano a inimigos na frente do jogador
+    {
+        Collider[] hitCollider = Physics.OverlapBox(transform.position + transform.forward * 2, Vector3.one); // Cria uma caixa de colisão na frente do jogador
+        Debug.Log(hitCollider.Length); // Loga quantos colliders foram atingidos (para debug)
+        foreach (var collider in hitCollider) // Itera sobre todos os colliders encontrados na caixa
+        {
+                if (collider.gameObject == this.gameObject) continue; // Ignora o próprio jogador
+            Enemy enemy = collider.GetComponent<Enemy>(); // Tenta obter o componente Enemy do objeto colidido
+            if (enemy != null) // Se encontrou um componente Enemy no collider
+            {
+                    enemy.TakeDamage(-damageAmount); // Aplica dano ao inimigo
+                                                     //problema no takedamage: está sendo chamado duas vezes
+            }
+        }
+    }
 
     void Update() 
     {
