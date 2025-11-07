@@ -8,9 +8,11 @@ using static UnityEditor.Progress;
 public class Inventory : MonoBehaviour
 {
     public static Inventory instance; // Singleton instance
-    public List<Item> inventory = new List<Item>(); // List to hold inventory items
+    public List<Itens> inventory = new List<Itens>(); // List to hold inventory items
     public Transform itemContent; // Parent transform for UI item display
     public GameObject inventoryItem; // Prefab for individual inventory item UI
+
+    public Dictionary<int, GameObject> a;
 
     void Awake()
     {
@@ -21,11 +23,11 @@ public class Inventory : MonoBehaviour
         }
         instance = this; // Assign singleton instance
     }
-    public void AddItem(Item item)
+    public void AddItem(Itens item)
     {
         inventory.Add(item); // Add item to inventory list
     }
-    public void RemoveItem(Item item)
+    public void RemoveItem(Itens item)
     {
         inventory.Remove(item); // Remove item from inventory list
     }
@@ -35,7 +37,7 @@ public class Inventory : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        foreach (Item item in inventory) // Iterate through each item in the inventory
+        foreach (Itens item in inventory) // Iterate through each item in the inventory
         {
             GameObject obj = Instantiate(inventoryItem, itemContent); // Instantiate UI element for the item
             TMP_Text itemName = obj.transform.Find("ItemName").GetComponent<TMP_Text>(); // Get reference to the item name text component

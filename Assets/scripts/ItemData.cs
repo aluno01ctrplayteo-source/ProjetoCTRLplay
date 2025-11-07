@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ItemData : MonoBehaviour, IInteracted
 {
-    public Item item; // Reference to the Item scriptable object
+    public Itens item; // Reference to the Item scriptable object
 
     public void Interacted() 
     {
