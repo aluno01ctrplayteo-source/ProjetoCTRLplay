@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public GameObject pauseMenu;
     public int currency = 0;
     public TMP_Text coinDisplay;
-    public List<Enemy> enemies;
+    public List<EnemyAI> enemies;
     public GameObject gameOverMenu;
     public GameObject inventoryMenu;
 
@@ -32,11 +32,12 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        enemies = new List<Enemy>(FindObjectsOfType<Enemy>());
+        enemies = new List<EnemyAI>(FindObjectsOfType<EnemyAI>());
     }
 
     public void GameOver()
     {
+        if (gameOverMenu == null) return;
         gameOverMenu.SetActive(true);
     }
 
@@ -48,12 +49,16 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        coinDisplay.text = $"Coins -> {currency}";  
+        if (coinDisplay != null)
+            coinDisplay.text = $"Coins -> {currency}";  
+        if (pauseMenu == null) return;
         pauseMenu.SetActive(false);
+        if (inventoryMenu == null) return;
         inventoryMenu.SetActive(false);
     }
     public void IsGamePaused()
     {
+        if (pauseMenu == null) return;
         isPaused = !isPaused;
         if (isPaused)
         {
@@ -68,6 +73,7 @@ public class GameManager : MonoBehaviour
     }
     public void IsInventoryOpen()
     {
+        if (inventoryMenu == null) return;
         isPaused = !isPaused;
         if (isPaused)
         {
