@@ -11,10 +11,13 @@ public class GameManager : MonoBehaviour
     public bool isPaused;
     public GameObject pauseMenu;
     public int currency = 0;
+    public int killCount = 0;
     public TMP_Text coinDisplay;
-    public List<EnemyAI> enemies;
+    public List<LivingRockEnemyAI> enemies;
     public GameObject gameOverMenu;
     public GameObject inventoryMenu;
+
+    private string initialCoinDisplayText;
 
     void Awake()
     {
@@ -32,7 +35,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        enemies = new List<EnemyAI>(FindObjectsOfType<EnemyAI>());
+        enemies = new List<LivingRockEnemyAI>(FindObjectsOfType<LivingRockEnemyAI>());
     }
 
     public void GameOver()
@@ -50,13 +53,21 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         if (coinDisplay != null)
-            coinDisplay.text = $"Coins -> {currency}";  
+            initialCoinDisplayText = coinDisplay.text;
         if (pauseMenu == null) return;
         pauseMenu.SetActive(false);
         if (inventoryMenu == null) return;
         inventoryMenu.SetActive(false);
     }
-    public void IsGamePaused()
+    public void ChangeCurrencyAmount(int amount)
+    {
+        currency += amount;
+        if (coinDisplay != null)
+        {
+            coinDisplay.text = $"{initialCoinDisplayText} -> {currency}";
+        }
+    }
+    public void GamePaused()
     {
         if (pauseMenu == null) return;
         isPaused = !isPaused;
@@ -71,7 +82,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
         }
     }
-    public void IsInventoryOpen()
+    public void InventoryOpen()
     {
         if (inventoryMenu == null) return;
         isPaused = !isPaused;
@@ -92,7 +103,7 @@ public class GameManager : MonoBehaviour
     }
     public void Continue()
     {
-        IsGamePaused();
+        GamePaused();
     }
 }
 public interface IInteracted

@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IDamageable
+public interface IDamageableEnemy
 {
-    abstract void TakeDamage(int change);
-    abstract void Death();
-    abstract int maxHealth { get; set; }
-    abstract int currentHealth { get; set; }
+
+    void TakeDamage(int change);
+    void Death();
+    int MaxHealth { get; set; }
+    int MinHealth { get; set; }
+    int CurrentHealth { get; set; }
 }

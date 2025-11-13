@@ -39,8 +39,8 @@ public class FpsControll : MonoBehaviour
         ControllerInputs.Player.Jump.performed += ctx => Jump(); // Ao disparar o evento 'Jump.performed', chama o m�todo Jump()
         ControllerInputs.Player.Move.performed += ctx => velocity = ctx.ReadValue<Vector2>(); // Ao movimentar, l� o Vector2 (input) e armazena em 'velocity'
         ControllerInputs.Player.Move.canceled += ctx => velocity = Vector2.zero; // Quando o input de movimento � cancelado (soltou a tecla/joystick), zera a velocidade
-        ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.IsGamePaused(); // Ao apertar Pause, chama o m�todo no GameManager (possivelmente alterna pausa)
-        ControllerInputs.Player.Inventory.performed += ctx => GameManager.instance.IsInventoryOpen(); // Ao apertar Inventory, chama o m�todo no GameManager (possivelmente abre/fecha invent�rio)
+        ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.GamePaused(); // Ao apertar Pause, chama o m�todo no GameManager (possivelmente alterna pausa)
+        ControllerInputs.Player.Inventory.performed += ctx => GameManager.instance.InventoryOpen(); // Ao apertar Inventory, chama o m�todo no GameManager (possivelmente abre/fecha invent�rio)
         ControllerInputs.Player.Attack.performed += ctx => Attack() ; // Ao apertar Attack, chama o m�todo Attack no playerCombat do GameManager
     } 
 
@@ -79,7 +79,7 @@ public class FpsControll : MonoBehaviour
         foreach (var collider in hitCollider) // Itera sobre todos os colliders encontrados na caixa
         {
                 if (collider.gameObject == this.gameObject) continue; // Ignora o pr�prio jogador
-            EnemyAI enemy = collider.GetComponent<EnemyAI>(); // Tenta obter o componente Enemy do objeto colidido
+            LivingRockEnemyAI enemy = collider.GetComponent<LivingRockEnemyAI>(); // Tenta obter o componente Enemy do objeto colidido
             if (enemy != null) // Se encontrou um componente Enemy no collider
             {
                     enemy.TakeDamage(-damageAmount); // Aplica dano ao inimigo

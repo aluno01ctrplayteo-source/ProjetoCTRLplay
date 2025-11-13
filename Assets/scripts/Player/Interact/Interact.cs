@@ -38,16 +38,10 @@ public class Interact : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coin"))
-        {
-            Destroy(other.gameObject);
-            gameManager.currency++;
-            gameManager.coinDisplay.text = $"Coins -> {gameManager.currency}";
-        }
         if (other.CompareTag("Healer"))
         {
             Destroy(other.gameObject);
-            gameManager.healthManager.HpChanger(20);
+            gameManager.healthManager.ChangeHpValue(20);
         }
     }
     

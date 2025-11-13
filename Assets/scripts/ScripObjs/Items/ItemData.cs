@@ -4,17 +4,25 @@ using UnityEngine;
 
 public class ItemData : MonoBehaviour, IInteracted
 {
-    public Items item; // Reference to the Item scriptable object
+    public List<Items> items; // Reference to the Item scriptable object
+    public int goldAmount;
 
     public void Interacted() 
     {
         Inventory inventory = GameObject.FindAnyObjectByType<Inventory>();
-        if (inventory != null) // Check if the inventory instance exists
+        if (inventory != null && items.Count != 0)
         {
-            inventory.AddItem(item);
+            foreach (var i in items)
+            {
+                inventory.AddItem(i);
+            }
             inventory.ListItems();
-            Destroy(gameObject);
         }
+        if (!(goldAmount <= 0))
+        {
+            GameManager.instance.ChangeCurrencyAmount(goldAmount);
+        }
+        Destroy(gameObject);
     }
 
     public void OnDrop()

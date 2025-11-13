@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class EnemyState
 {
-    protected EnemyAI enemyAI;
+    protected LivingRockEnemyAI enemyAI;
     protected EnemyStateMachine stateMachine;
 
-    public EnemyState(EnemyAI enemyAI, EnemyStateMachine stateMachine)
+    public EnemyState(LivingRockEnemyAI enemyAI, EnemyStateMachine stateMachine)
     {
         this.enemyAI = enemyAI;
         this.stateMachine = stateMachine;

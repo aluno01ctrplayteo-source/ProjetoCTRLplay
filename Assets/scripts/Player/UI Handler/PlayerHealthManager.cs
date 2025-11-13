@@ -25,7 +25,7 @@ public class PlayerHealthManager : MonoBehaviour
             GameManager.instance.GameOver();
         }
     }
-    public void HpChanger(int amount)
+    public void ChangeHpValue(int amount)
     {
         health += amount;
         health = Mathf.Clamp(health, minHealth, maxHealth);
