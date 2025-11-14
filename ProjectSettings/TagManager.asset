@@ -6,10 +6,10 @@ TagManager:
   tags:
   - Walls
   - Floor
-  - Coin
   - Healer
   - Ground
   - Item
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -17,7 +17,7 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
+  - Enemy
   - 
   - 
   - 

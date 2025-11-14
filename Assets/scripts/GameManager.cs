@@ -54,6 +54,7 @@ public class GameManager : MonoBehaviour
     {
         if (coinDisplay != null)
             initialCoinDisplayText = coinDisplay.text;
+        coinDisplay.text = $"{initialCoinDisplayText} -> {currency}";
         if (pauseMenu == null) return;
         pauseMenu.SetActive(false);
         if (inventoryMenu == null) return;

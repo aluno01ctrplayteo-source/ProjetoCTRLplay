@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a38228ed21b72cf45928d2a56b5efe95
+guid: 30cb75e8b1ea38944bc32780e36323dc
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
@@ -14,6 +14,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Iron_Mail
     second: {fileID: 2100000, guid: e80a38312a019604e9e3fc8e33ef64a2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Leather
+    second: {fileID: 2100000, guid: 4c93a2d13e65ddd4a889d55874dd77fc, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -80,7 +85,7 @@ ModelImporter:
     strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
-    normalImportMode: 1
+    normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0

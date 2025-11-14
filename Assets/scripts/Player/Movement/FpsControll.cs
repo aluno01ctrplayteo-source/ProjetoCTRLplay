@@ -76,14 +76,15 @@ public class FpsControll : MonoBehaviour
         //Usar Raycast para detectar inimigos na frente do jogador
         Collider[] hitCollider = Physics.OverlapBox(transform.position + transform.forward * 2, Vector3.one); // Cria uma caixa de colis�o na frente do jogador
         Debug.Log(hitCollider.Length); // Loga quantos colliders foram atingidos (para debug)
+        List<IDamageableEnemy> damagedEnemies = new(); // Conjunto para rastrear inimigos j� danificados nesta chamada de ataque
         foreach (var collider in hitCollider) // Itera sobre todos os colliders encontrados na caixa
         {
-                if (collider.gameObject == this.gameObject) continue; // Ignora o pr�prio jogador
-            LivingRockEnemyAI enemy = collider.GetComponent<LivingRockEnemyAI>(); // Tenta obter o componente Enemy do objeto colidido
-            if (enemy != null) // Se encontrou um componente Enemy no collider
+            if (collider.gameObject == this.gameObject) continue; // Ignora o pr�prio jogador
+            IDamageableEnemy enemy = collider.GetComponent<IDamageableEnemy>();
+            if (enemy != null && collider.gameObject.CompareTag("Enemy") && !damagedEnemies.Contains(enemy)) 
             {
-                    enemy.TakeDamage(-damageAmount); // Aplica dano ao inimigo
-                                                     //problema no takedamage: est� sendo chamado duas vezes
+                enemy.TakeDamage(-damageAmount); // Aplica dano ao inimigo
+                damagedEnemies.Add(enemy);
             }
         }
     }

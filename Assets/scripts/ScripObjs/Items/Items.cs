@@ -11,5 +11,4 @@ public class Items : ScriptableObject
     public int healingValue;
     public Sprite itemIcon;
     public string itemName;
-    public GameObject prefab;
 }

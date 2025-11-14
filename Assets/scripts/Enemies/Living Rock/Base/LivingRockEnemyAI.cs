@@ -58,6 +58,7 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         agent.speed = moveSpeed;
         enemyName = enemy.enemyName;
 
+
     }
 
     private void OnEnable()
@@ -67,29 +68,36 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
 
     public IEnumerator Attack()
     {
-        if (!IsAttackHitboxCollidingWith("Player") || isAttacking) yield break;
-
-        canMove = false;
         isAttacking = true;
+        canMove = false;
+
+
+
         yield return new WaitForSeconds(.5f);
-        if (!IsAttackHitboxCollidingWith("Player")) yield break;
+
+        if (!IsAttackHitboxCollidingWith("Player")) { isAttacking = false; canMove = true; yield break; }
         gameManager.healthManager.ChangeHpValue(-damage);
+
         yield return new WaitForSeconds(.5f);
+
         isAttacking = false;
         canMove = true;
-
+        
     }
     public bool IsAttackHitboxCollidingWith(string tag)
     {
         Collider[] hitColliders = new Collider[10];
-        Physics.OverlapBoxNonAlloc(transform.position + transform.forward, Vector3.one, hitColliders, Quaternion.identity, 0);
-        foreach (Collider collider in hitColliders)
+        int hitCount = Physics.OverlapBoxNonAlloc(transform.position + transform.forward * 1, new Vector3(.7f,.7f,1.5f), hitColliders, transform.rotation, LayerMask.GetMask("Default"));
+        if (hitCount == 0) return false;
+        
+        for (int i = 0; i < hitCount; i++)
         {
-            if (collider.CompareTag(tag))
+            if (hitColliders[i] != null && hitColliders[i].gameObject.CompareTag(tag))
             {
                 return true;
             }
         }
+           
         return false;
     }
     public void TakeDamage(int change)
@@ -106,10 +114,10 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         Destroy(this.gameObject);
     }
 
-    private void OnDrawGizmosSelected()
+    void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(transform.position + transform.forward * 1, Vector3.one);
+        Gizmos.DrawWireCube(transform.position + transform.forward * 1, new Vector3(.7f, .7f, 1.5f));
     }
 
     public bool IsOnViewRange()
@@ -121,20 +129,19 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
 
     public void FollowPlayer()
     {
-
         if (!IsOnViewRange() || !canMove) { agent.isStopped = true; return; }
         agent.isStopped = false;
         agent.SetDestination(player.position);
     }
     void Update()
     {
-        ApplyGravity();
-        FollowPlayer();
-        if (!isAttacking) StartCoroutine(Attack());
+        //ApplyGravity();
+        FollowPlayer();;
+        if (IsAttackHitboxCollidingWith("Player") && !isAttacking) StartCoroutine(Attack());
     }
     public void ApplyGravity() 
     {
-        /*if (isGrounded && verticalVelocity < 0) 
+        if (isGrounded && verticalVelocity < 0) 
         {
             verticalVelocity = -2f; 
         }
@@ -142,7 +149,7 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         {
             verticalVelocity += gravity * Time.deltaTime; 
         }
-        verticalVelocity = Mathf.Clamp(verticalVelocity, -50f, 50f);*/
+        verticalVelocity = Mathf.Clamp(verticalVelocity, -50f, 50f);
     }
 
 }
