@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class FpsControll : MonoBehaviour
@@ -31,6 +32,7 @@ public class FpsControll : MonoBehaviour
     private void Awake() 
     {
         ControllerInputs = new Controlle(); // Instancia o objeto de Input Actions (geralmente gerado pelo novo Input System)
+        playerAnimations = playerAnimations ? null : GetComponent<Animator>();
     } 
 
     private void OnEnable() 
@@ -42,13 +44,15 @@ public class FpsControll : MonoBehaviour
         ControllerInputs.Player.Pause.performed += ctx => GameManager.instance.GamePaused(); // Ao apertar Pause, chama o m�todo no GameManager (possivelmente alterna pausa)
         ControllerInputs.Player.Inventory.performed += ctx => GameManager.instance.InventoryOpen(); // Ao apertar Inventory, chama o m�todo no GameManager (possivelmente abre/fecha invent�rio)
         ControllerInputs.Player.Attack.performed += ctx => Attack() ; // Ao apertar Attack, chama o m�todo Attack no playerCombat do GameManager
-    } 
+    }
 
     private void OnDisable()
-    { 
+    {
         ControllerInputs.Disable(); // Desativa o mapa de a��es (interrompe leitura de inputs)
-       
+
     } 
+    
+
 
     void Jump() // M�todo que executa a l�gica de pulo
     {
@@ -81,7 +85,7 @@ public class FpsControll : MonoBehaviour
         {
             if (collider.gameObject == this.gameObject) continue; // Ignora o pr�prio jogador
             IDamageableEnemy enemy = collider.GetComponent<IDamageableEnemy>();
-            if (enemy != null && collider.gameObject.CompareTag("Enemy") && !damagedEnemies.Contains(enemy)) 
+            if (enemy != null && collider.gameObject.CompareTag("Enemy") && !damagedEnemies.Contains(enemy))
             {
                 enemy.TakeDamage(-damageAmount); // Aplica dano ao inimigo
                 damagedEnemies.Add(enemy);
@@ -89,6 +93,14 @@ public class FpsControll : MonoBehaviour
         }
     }
 
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("DamagePlayerHitBox"))
+        {
+            GameManager.instance.healthManager.ChangeHpValue(-10);
+        }
+    }
     void Update() 
     {
         CheckGrounded(); // Verifica se o jogador est� no ch�o e atualiza isGrounded

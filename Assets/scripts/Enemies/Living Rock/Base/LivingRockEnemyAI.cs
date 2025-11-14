@@ -36,9 +36,10 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
 
     //.
     [Header("Components")]
+    public Collider attackHitBox;
     public Enemies enemy;
     public NavMeshAgent agent;
-    public Animator anim;
+    public Animator anim;   
     static GameManager gameManager;
 
     private void Awake()
@@ -57,8 +58,7 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         moveSpeed = enemy.speed;
         agent.speed = moveSpeed;
         enemyName = enemy.enemyName;
-
-
+        anim.SetFloat("movement", 0);
     }
 
     private void OnEnable()
@@ -76,9 +76,11 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         yield return new WaitForSeconds(.5f);
 
         if (!IsAttackHitboxCollidingWith("Player")) { isAttacking = false; canMove = true; yield break; }
-        gameManager.healthManager.ChangeHpValue(-damage);
+        anim.SetTrigger("isAttacking");
+        //gameManager.healthManager.ChangeHpValue(-damage);
 
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(1.2f);
+        anim.ResetTrigger("isAttacking");
 
         isAttacking = false;
         canMove = true;
@@ -86,6 +88,10 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
     }
     public bool IsAttackHitboxCollidingWith(string tag)
     {
+        
+        
+        
+        
         Collider[] hitColliders = new Collider[10];
         int hitCount = Physics.OverlapBoxNonAlloc(transform.position + transform.forward * 1, new Vector3(.7f,.7f,1.5f), hitColliders, transform.rotation, LayerMask.GetMask("Default"));
         if (hitCount == 0) return false;
@@ -114,11 +120,11 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
         Destroy(this.gameObject);
     }
 
-    void OnDrawGizmosSelected()
+    /*void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(transform.position + transform.forward * 1, new Vector3(.7f, .7f, 1.5f));
-    }
+    }*/
 
     public bool IsOnViewRange()
     {
@@ -129,9 +135,10 @@ public class LivingRockEnemyAI : MonoBehaviour, IDamageableEnemy, IMoveableEnemy
 
     public void FollowPlayer()
     {
-        if (!IsOnViewRange() || !canMove) { agent.isStopped = true; return; }
+        if (!IsOnViewRange() || !canMove) { agent.isStopped = true; anim.SetFloat("movement", 0); return; }
         agent.isStopped = false;
         agent.SetDestination(player.position);
+        anim.SetFloat("movement", 1);
     }
     void Update()
     {
