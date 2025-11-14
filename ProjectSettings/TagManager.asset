@@ -10,6 +10,7 @@ TagManager:
   - Ground
   - Item
   - Enemy
+  - DamagePlayerHitBox
   layers:
   - Default
   - TransparentFX
