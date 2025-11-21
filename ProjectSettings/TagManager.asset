@@ -10,16 +10,17 @@ TagManager:
   - Ground
   - Item
   - Enemy
-  - DamagePlayerHitBox
+  - LightSource
+  - EnemyZone
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - Scenario
   - Water
   - UI
   - Enemy
-  - 
+  - Player
   - 
   - 
   - 

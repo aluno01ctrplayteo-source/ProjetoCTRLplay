@@ -15,11 +15,6 @@ public class HealthManager : MonoBehaviour
     {
         hpBar.value = health;
     }
-
-    private void Update()
-    {
-        
-    }
     public void HpChanger(int amount)
     {
         Mathf.Clamp(health, minHealth, maxHealth);

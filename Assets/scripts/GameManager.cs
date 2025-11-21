@@ -1,8 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Accessibility;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,11 +17,15 @@ public class GameManager : MonoBehaviour
     public GameObject pauseMenu;
     public int currency = 0;
     public int killCount = 0;
+    public GameObject torchLight;
     public TMP_Text coinDisplay;
-    public List<LivingRockEnemyAI> enemies;
+    public List<GameObject> enemies;
     public GameObject gameOverMenu;
     public GameObject inventoryMenu;
-
+    public List<Items> items;
+    public event Action OnEnemyCreation;
+    public event Action OnEnemyDeath;
+    
     private string initialCoinDisplayText;
 
     void Awake()
@@ -32,22 +41,36 @@ public class GameManager : MonoBehaviour
         }
         healthManager = FindAnyObjectByType<PlayerHealthManager>();
     }
-
-    private void Update()
+    public void RaiseEnemyDeathEvent() => OnEnemyDeath?.Invoke();
+    public void RaiseEnemyCreationEvent()
     {
-        enemies = new List<LivingRockEnemyAI>(FindObjectsOfType<LivingRockEnemyAI>());
+        OnEnemyCreation?.Invoke();
+        enemies = new(GameObject.FindGameObjectsWithTag("Enemy"));
     }
-
-    public void GameOver()
+    public IEnumerator GameOver()
     {
-        if (gameOverMenu == null) return;
-        gameOverMenu.SetActive(true);
+        if (gameOverMenu == null) yield break;
+        Graphic g = gameOverMenu.GetComponentInChildren<Graphic>();
+        Color c = g.color;
+        while (c.a != 1) { c.a += .2f * Time.deltaTime; g.color = c; yield return null; }
+        yield return new WaitForSeconds(1);
+        ReloadLevel();
     }
 
     public void ReloadLevel()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void InstantiateLightingSources(GameObject light)
+    {
+        List<GameObject> list = new(GameObject.FindGameObjectsWithTag("LightSource"));
+        foreach (GameObject source in list)
+        {
+            Vector3 pos = source.transform.position + Vector3.up;
+            Instantiate(light, pos, Quaternion.identity, source.transform).SetActive(true);
+        }
     }
 
     void Start()
@@ -59,6 +82,7 @@ public class GameManager : MonoBehaviour
         pauseMenu.SetActive(false);
         if (inventoryMenu == null) return;
         inventoryMenu.SetActive(false);
+        InstantiateLightingSources(torchLight);
     }
     public void ChangeCurrencyAmount(int amount)
     {
@@ -109,7 +133,10 @@ public class GameManager : MonoBehaviour
 }
 public interface IInteracted
 {
-    void Interacted();
+    void Interacted()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 // Brackeys
