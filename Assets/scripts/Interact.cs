@@ -39,11 +39,6 @@ public class Interact : MonoBehaviour
                 DoorTrigger doorTrigger = hit.transform.gameObject.GetComponent<DoorTrigger>();
                 StartCoroutine(doorTrigger.Interacted());
             }
-            if (hit.transform.gameObject.GetComponent<PuzzleButton>() != null && controllerInputs.Player.Interaction.WasPressedThisFrame() == true)
-            {
-                PuzzleButton button = hit.transform.gameObject.GetComponent<PuzzleButton>();
-                button.Interacted();
-            }
         }
     }
     private void OnTriggerEnter(Collider other)
