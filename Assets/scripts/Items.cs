@@ -8,7 +8,13 @@ public class Items : ScriptableObject
 {
     public Items myData;
     public int id;
-    public int healingValue;
+    public ItemType itemType;
+    public int value;
     public Sprite itemIcon;
     public string itemName;
+}
+public enum ItemType
+{
+    GoodConsumable,
+    BadConsumable
 }

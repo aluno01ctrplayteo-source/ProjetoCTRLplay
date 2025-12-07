@@ -41,13 +41,5 @@ public class Interact : MonoBehaviour
             }
         }
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Healer"))
-        {
-            Destroy(other.gameObject);
-            gameManager.healthManager.ChangeHpValue(20);
-        }
-    }
     
 }

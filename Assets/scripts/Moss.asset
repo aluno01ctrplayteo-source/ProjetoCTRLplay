@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50993efdcb7b75248a298a2eb125957a, type: 3}
+  m_Script: {fileID: 11500000, guid: aa758219639515b4490bfa365df7ff28, type: 3}
   m_Name: Moss
   m_EditorClassIdentifier: 
   myData: {fileID: 11400000}
-  id: 13
-  healingValue: 5
+  id: 15
+  itemType: 0
+  value: 5
   itemIcon: {fileID: 21300000, guid: 019cd4bc90882124fbfa557860e4a712, type: 3}
   itemName: Moss

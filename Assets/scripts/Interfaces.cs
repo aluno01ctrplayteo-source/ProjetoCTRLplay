@@ -4,12 +4,15 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    IEnumerator TakeDamage(HitBox hitbox);
-    IEnumerator TakeDamage(int damage);
+    IEnumerator TakeHitboxDamage(HitBox hitbox);
+    IEnumerator TakeDirectDamage(int damage);
     void Heal(int amount);
     IEnumerator Death();
-    int MaxHealth { get; set; }
-    int MinHealth { get; set; }
+    int MaxHealth { get; }
+    int MinHealth { get; }
     int CurrentHealth { get; set; }
 }
+public interface IEnemyMarker
+{
 
+}
