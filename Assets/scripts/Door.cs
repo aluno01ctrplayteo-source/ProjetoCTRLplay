@@ -26,7 +26,7 @@ public class Door : MonoBehaviour
     {
         if (isOpen) yield break;
         isOpen = true;
-        _cameraManager.StartCoroutine(_cameraManager.ShakeCamera(timeUntilComplete, 0.1f));
+        _cameraManager.StartCoroutine(_cameraManager.ShakeCamera(timeUntilComplete, 0.1f, false));
         for (float t = 0; t < timeUntilComplete; t += Time.deltaTime) 
         {
             Vector3 pos = Vector3.Lerp(transform.position, _targetpos, openSpeed * Time.deltaTime);

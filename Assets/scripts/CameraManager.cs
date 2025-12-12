@@ -35,14 +35,14 @@ public class CameraManager : MonoBehaviour
 
     // Update is called once per frame
 
-    public IEnumerator ShakeCamera(float seconds, float magnitude)
+    public IEnumerator ShakeCamera(float seconds, float magnitude, bool damp)
     {
         Vector3 originalPos = Camera.main.transform.localPosition;
         for (float i = 0; i < seconds; i += Time.deltaTime)
         {
             if (GameManager.instance.isPaused) { yield return null; continue; }
             float percentComplete = i / seconds;
-            float damper = 1 - percentComplete;
+            float damper = damp ? 1 - percentComplete : 1;
             Camera.main.transform.localPosition = Random.insideUnitSphere * magnitude * damper;
             yield return null;
         }

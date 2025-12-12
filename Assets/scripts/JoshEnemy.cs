@@ -51,7 +51,9 @@ public class JoshEnemy : StandardRangedEnemy
 
     public void InstantiateProjectile()
     {
-        Instantiate(projectile, projectileOrigin.position, Quaternion.LookRotation(player.position - transform.position));
+        GameObject pr = Instantiate(projectile, projectileOrigin.position, Quaternion.LookRotation(player.position - transform.position));
+        projectileAmount.Add(pr);
+        StartCoroutine(ProjectileBehaviour(pr));
     }
     public IEnumerator ShootProjectileAnim()
     {
@@ -73,12 +75,30 @@ public class JoshEnemy : StandardRangedEnemy
         }
 
     }
+
+    public override IEnumerator TakeHitboxDamage(HitBox hitBox)
+    {
+        if (isDead) yield break;
+        CurrentHealth -= hitBox.value;
+        CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
+        Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
+        if (CurrentHealth == 0) 
+        {
+            StartCoroutine(Death());
+        }
+    }
+
+    public override IEnumerator Death()
+    {
+        yield return null;
+    }
+
     public IEnumerator IsOnViewRange()
     {
         while (true)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            isTargetOnViewRange = distanceToPlayer <= stats.detectionRange;
+            Physics.Raycast(transform.position, player.position - transform.position, out RaycastHit hit, stats.detectionRange, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+            if(hit.collider != null) isTargetOnViewRange = hit.collider.CompareTag("Player");
             yield return null;
         }
     }

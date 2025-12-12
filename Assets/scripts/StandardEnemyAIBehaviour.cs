@@ -4,6 +4,9 @@ using UnityEngine.AI;
 using System;
 using System.Collections;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 
 namespace StandardEnemyAIBehaviour
 {
@@ -136,6 +139,8 @@ namespace StandardEnemyAIBehaviour
         public GameObject dropPrefab;
         public Transform projectileOrigin;
         public GameObject projectile;
+
+        public List<GameObject> projectileAmount;
         protected EnemyState _enemyState = EnemyState.Idle;
         protected EnemyState State { get{ return _enemyState; } set { _enemyState = value; OnStateUpdate?.Invoke(); } }
         public bool isDead = false;
@@ -157,6 +162,15 @@ namespace StandardEnemyAIBehaviour
         public Animator anim;
         public RangedEnemiesStats stats;
         internal GameManager gameManager;
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.transform.GetComponent<HitBox>() != null)
+            {
+                HitBox hitBox = other.GetComponent<HitBox>();
+                StartCoroutine(TakeHitboxDamage(hitBox));
+            }
+        }
 
         private void Awake()
         {
@@ -180,6 +194,15 @@ namespace StandardEnemyAIBehaviour
         public virtual IEnumerator TakeHitboxDamage(HitBox hitbox)
         {
             throw new NotImplementedException();
+        }
+
+        protected virtual IEnumerator ProjectileBehaviour(GameObject pr)
+        {
+            while (pr != null)
+            {
+                pr.transform.Translate(pr.transform.forward * 5 * Time.deltaTime, Space.World);
+                yield return null;
+            }   
         }
 
         public virtual void UpdateState()

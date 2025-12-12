@@ -64,15 +64,6 @@ public class JohnEnemy : StandardMeleeEnemy
            
         return false;
     }
-    public override IEnumerator TakeDirectDamage(int damage)
-    {
-        if (isDead) yield break;
-        CurrentHealth -= damage;
-        CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
-        //anim.SetTrigger("hasBeenDamaged"); // to implement
-        Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
-        StartCoroutine(Death());
-    }   
     public override IEnumerator Death()
     {
         isDead = true;

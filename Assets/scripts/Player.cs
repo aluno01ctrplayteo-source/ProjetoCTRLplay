@@ -50,7 +50,7 @@ public class Player : MonoBehaviour, IDamageable
     public event Action OnDeath;
     public bool isDead = false;
     private int _maxHealth = 100;
-    public bool takingDamage = false;
+    public bool tookDamage = false;
     public bool cancelAttack = false;
     public bool godMode = false;
     public bool waitForAttackEnd = false;
@@ -92,7 +92,7 @@ public class Player : MonoBehaviour, IDamageable
         ControllerInputs.Player.Attack.performed += OnAttack;
         OnDeath += () => { isDead = true; ControllerInputs.Disable(); body.freezeRotation = false; };
 
-        OnTakeDamage += () => { StartCoroutine(cameraManager.ShakeCamera(0.1f, 0.1f)); if (isAttacking) cancelAttack = true; };
+        OnTakeDamage += () => { if (isAttacking) cancelAttack = true; };
     }
 
     private void OnAttack(InputAction.CallbackContext ctx) => StartCoroutine(Attack());
@@ -106,6 +106,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private IEnumerator AirBorneTransition(float timeToTransitate = .1f)
     {
+        if(airBorneTransition) yield break;
         airBorneTransition = true;
         isGrounded = false;
         yield return new WaitForSeconds(timeToTransitate);
@@ -114,7 +115,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private void OnDisable()
     {
-        ControllerInputs.Disable(); // Desativa o mapa de a��es (interrompe leitura de inputs)
+        ControllerInputs.Disable(); // Desativa o mapa de acoes (interrompe leitura de inputs)
 
     }
 
@@ -147,7 +148,9 @@ public class Player : MonoBehaviour, IDamageable
         Vector3 current = body.velocity;
         desired = direction * moveSpeed - current;
 
-        body.AddForce(new Vector3(desired.x, 0f, desired.z), ForceMode.Impulse);
+        ForceMode forceMode = isGrounded ? ForceMode.VelocityChange : ForceMode.Impulse;
+
+        body.AddForce(new Vector3(desired.x, 0f, desired.z), forceMode);
     }
     public IEnumerator Attack()
     {
@@ -174,6 +177,7 @@ public class Player : MonoBehaviour, IDamageable
 
                 slowdown = false;
                 isAttacking = false;
+                canAttack = true;
                 yield break;
             }
 
@@ -215,6 +219,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             HitBox hb = other.transform.GetComponent<HitBox>();
             hb.ToggleTrigger();
+            StartCoroutine(hb.Destroy());
             StartCoroutine(TakeHitboxDamage(hb));
             
         }
@@ -247,13 +252,14 @@ public class Player : MonoBehaviour, IDamageable
     public IEnumerator TakeHitboxDamage(HitBox hitbox)
     {
         if (hitbox.type != HitboxType.Damage) yield break;
-        if (takingDamage) yield break;
+        if (tookDamage) yield break;
         
         
-        takingDamage = true;
+        tookDamage = true;
         OnTakeDamage?.Invoke();
         hitbox.ToggleTrigger();
         CurrentHealth -= hitbox.value;
+        StartCoroutine(cameraManager.ShakeCamera(.4f, 0.1f, false));
         if (hitbox.impactForce != 0)
         {
             StartCoroutine(AirBorneTransition(.3f));
@@ -262,12 +268,8 @@ public class Player : MonoBehaviour, IDamageable
             body.velocity = v;
             body.AddForce(((Vector3.up / 4) + hitbox.owner.transform.forward) * hitbox.impactForce, ForceMode.Impulse);
         }
-        for (float t = 0; t < 0.2f;)
-        {
-            t += Time.deltaTime;
-            yield return null;
-        }
-        takingDamage = false;
+        yield return new WaitForSeconds(0.2f);
+        tookDamage = false;
         if (CurrentHealth > 0.1f) yield break;
         StartCoroutine(Death());
     }
