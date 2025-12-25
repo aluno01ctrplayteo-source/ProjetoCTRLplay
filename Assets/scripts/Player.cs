@@ -78,6 +78,32 @@ public class Player : MonoBehaviour, IDamageable
 
     private void Start()
     {
+        //mesh drawing test
+        GameObject mesh = new("ProceduralMesh", typeof(MeshFilter)/* data */, typeof(MeshRenderer));
+        
+        Mesh m = new();
+        mesh.GetComponent<MeshFilter>().mesh = m;
+        mesh.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
+
+        Vector3[] vertices = new Vector3[]
+        {
+                           // indexes of each vertex
+            new(0,0,0),   // 0
+            new(0,1,0),  // 1
+            new(1,1,0), // 2
+            new(1,0,0) // 3
+        };
+
+        int[] triangles = new int[]
+        {
+                    // I like to think these are indexes that form triangles using the vertices above
+            0,1,2, // first triangle
+            0,2,3 // second triangle
+        };
+
+        m.vertices = vertices;
+        m.triangles = triangles;
+        m.RecalculateNormals();
         StartCoroutine(CheckGrounded());
     }
 
@@ -148,9 +174,9 @@ public class Player : MonoBehaviour, IDamageable
         Vector3 current = body.velocity;
         desired = direction * moveSpeed - current;
 
-        ForceMode forceMode = isGrounded ? ForceMode.VelocityChange : ForceMode.Impulse;
+        ForceMode force = isGrounded ? ForceMode.VelocityChange : ForceMode.Impulse;
 
-        body.AddForce(new Vector3(desired.x, 0f, desired.z), forceMode);
+        body.AddForce(new Vector3(desired.x, 0f, desired.z), force);
     }
     public IEnumerator Attack()
     {
@@ -219,7 +245,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             HitBox hb = other.transform.GetComponent<HitBox>();
             hb.ToggleTrigger();
-            StartCoroutine(hb.Destroy());
+            StartCoroutine(hb.DestroyH());
             StartCoroutine(TakeHitboxDamage(hb));
             
         }
@@ -240,7 +266,8 @@ public class Player : MonoBehaviour, IDamageable
         while (true)
         {
             if (airBorneTransition) { yield return null; continue; }
-            isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, LayerMask.GetMask("Scenario"), QueryTriggerInteraction.Ignore);
+            Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitInfo, 1.1f, LayerMask.GetMask("Scenario"), QueryTriggerInteraction.Ignore);
+            if (hitInfo.collider != null) isGrounded = hitInfo.collider.CompareTag("Ground");
             yield return null;
         }
     }
@@ -271,9 +298,9 @@ public class Player : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.2f);
         tookDamage = false;
         if (CurrentHealth > 0.1f) yield break;
-        StartCoroutine(Death());
+        StartCoroutine(DeathState());
     }
-    public IEnumerator Death()
+    public IEnumerator DeathState()
     {
         OnDeath?.Invoke();
         yield return null;
@@ -296,7 +323,7 @@ public class Player : MonoBehaviour, IDamageable
         yield return null;
         if (CurrentHealth <= 0)
         {
-            StartCoroutine(Death());
+            StartCoroutine(DeathState());
         }
     }
 }

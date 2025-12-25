@@ -64,7 +64,7 @@ public class JohnEnemy : StandardMeleeEnemy
            
         return false;
     }
-    public override IEnumerator Death()
+    public override IEnumerator DeathState()
     {
         isDead = true;
         gameManager.RaiseEnemyDeathEvent();
@@ -130,6 +130,6 @@ public class JohnEnemy : StandardMeleeEnemy
         CurrentHealth -= hitbox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
         Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
-        if (CurrentHealth < 0.1f) StartCoroutine(Death());
+        if (CurrentHealth < 0.1f) StartCoroutine(DeathState());
     }
 }

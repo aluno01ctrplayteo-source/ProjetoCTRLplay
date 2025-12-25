@@ -7,7 +7,7 @@ public interface IDamageable
     IEnumerator TakeHitboxDamage(HitBox hitbox);
     IEnumerator TakeDirectDamage(int damage);
     void Heal(int amount);
-    IEnumerator Death();
+    IEnumerator DeathState();
     int MaxHealth { get; }
     int MinHealth { get; }
     int CurrentHealth { get; set; }

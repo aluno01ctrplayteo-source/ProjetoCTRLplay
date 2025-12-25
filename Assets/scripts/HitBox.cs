@@ -10,6 +10,7 @@ public class HitBox : MonoBehaviour
     public GameObject owner;
     public HitboxType type;
     public bool destroyOnHit;
+    public bool isDestroying;
     public GameObject destroyParticle;
     public bool hitPlayer;
     public int impactForce = 5;
@@ -32,12 +33,22 @@ public class HitBox : MonoBehaviour
         UpdateHitBox();
     }
 
-    public IEnumerator Destroy()
+    public IEnumerator DestroyH()
     {
         if (!destroyOnHit) yield break;
-        yield return new WaitForEndOfFrame();
-        Instantiate(destroyParticle, transform.position, transform.rotation);
+        if (isDestroying) yield break;
+        isDestroying = true;
+        GameObject instantiatedParticle = Instantiate(destroyParticle, transform.position, transform.rotation);
+        DestroyParticleRes(instantiatedParticle);
         Destroy(owner);
+    }
+
+    private void DestroyParticleRes(GameObject g)
+    {
+        float t1 = g.GetComponent<ParticleSystem>().main.duration;
+        float t2 = g.GetComponent<ParticleSystem>().main.startLifetime.constant;
+        float totalTime = t1 + t2;
+        Destroy(g, totalTime);
     }
 
     private void UpdateHitBox()

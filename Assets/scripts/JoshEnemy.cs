@@ -3,119 +3,139 @@ using System.Collections.Generic;
 using UnityEngine;
 using StandardEnemyAIBehaviour;
 using UnityEngine.XR;
+using System.Threading.Tasks;
+using System.Threading;
 
 public class JoshEnemy : StandardRangedEnemy
 {
-    private void OnEnable()
-    {
-        OnStateUpdate += UpdateState;
-        StartCoroutine(PointTowardsPlayer());
-    }
 
-    public IEnumerator Attack()
+    public IEnumerator AttackState()
     {
-        while (isTargetOnViewRange)
+        int Attacking = 0;
+
+        void PointTowards(RaycastHit h, out bool pointingtowards)
         {
-            yield return StartCoroutine(ShootProjectileAnim());
-            
+            Vector3 point = h.point;
+            point.y = transform.position.y;
+            Vector3 dir = point - transform.position;
+            Quaternion targetRotation = Quaternion.LookRotation(dir, transform.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+            float angle = Quaternion.Angle(transform.rotation, targetRotation);
+            pointingtowards = angle < 15f;
+        }   
+
+        GameObject InstantiateProjectile()
+        {
+            GameObject pr = Instantiate(projectile, projectileOrigin.position, Quaternion.LookRotation(player.position - transform.position));
+            HitBox prhb = pr.GetComponent<HitBox>();
+            projectileAmount.Add(pr);
+            StartCoroutine(ProjectileBehaviour(pr, prhb));
+            return pr;
         }
-        if (!isTargetOnViewRange) State = EnemyState.Idle;
-    }
 
-
-    private void Start()
-    {
-        UpdateState();
-        StartCoroutine(IsOnViewRange());
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        if (player == null) return;
-        Gizmos.DrawRay(transform.position, player.position - transform.position);
-    }
-
-    public IEnumerator Idle()
-    {
-        while (State == EnemyState.Idle)
+        IEnumerator ShootProjectile()
         {
-            if (isTargetOnViewRange)
+            if (Interlocked.Exchange(ref Attacking, 1) == 1) yield break;
+            anim.SetTrigger("attack");
+            yield return new WaitForSeconds(.3f);
+            InstantiateProjectile();
+            yield return new WaitForSeconds(stats.attackSpeed);
+            Interlocked.Exchange(ref Attacking, 0);
+        }
+
+        while (State == EnemyState.Attacking)
+        {
+            bool canSeePlayer = CanSeePlayer(out RaycastHit hit);
+            PointTowards(hit, out bool b);
+            if (!canSeePlayer) 
             {
-                State = EnemyState.Attacking;
+                ChangeState(EnemyState.Idle);
+                yield break;
+            }
+            if (b)
+            {
+                StartCoroutine(ShootProjectile());
             }
             yield return null;
         }
     }
 
 
-    public void InstantiateProjectile()
+    private void Start()
     {
-        GameObject pr = Instantiate(projectile, projectileOrigin.position, Quaternion.LookRotation(player.position - transform.position));
-        projectileAmount.Add(pr);
-        StartCoroutine(ProjectileBehaviour(pr));
+        ChangeState(EnemyState.Idle);
     }
-    public IEnumerator ShootProjectileAnim()
+
+    private void OnDrawGizmosSelected()
     {
-        anim.SetTrigger("attack");
-        yield return null;
-        yield return new WaitForSeconds(stats.attackSpeed);
-    }
-    private IEnumerator PointTowardsPlayer()
-    {
-        while (true)
+        Gizmos.color = Color.yellow;
+
+        if (player != null) 
         {
-            yield return new WaitUntil(() => isTargetOnViewRange == true);
-            Physics.Raycast(transform.position, player.position - transform.position, out RaycastHit hit, Mathf.Infinity, -1, QueryTriggerInteraction.Ignore);
-            Vector3 point = hit.point;
-            point.y = transform.position.y;
-            Vector3 dir = point - transform.position;
-            transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            Gizmos.DrawRay(transform.position, transform.position - player.position); 
+        }
+    }
+
+    public IEnumerator IdleState()
+    {
+        while (State == EnemyState.Idle)
+        {
+            if (CanSeePlayer())
+            {
+                ChangeState(EnemyState.Attacking);
+                yield break;
+            }
             yield return null;
         }
-
     }
+
 
     public override IEnumerator TakeHitboxDamage(HitBox hitBox)
     {
-        if (isDead) yield break;
         CurrentHealth -= hitBox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
         Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
         if (CurrentHealth == 0) 
         {
-            StartCoroutine(Death());
+            ChangeState(EnemyState.Dead);
         }
-    }
-
-    public override IEnumerator Death()
-    {
         yield return null;
     }
 
-    public IEnumerator IsOnViewRange()
+    public bool CanSeePlayer()
     {
-        while (true)
-        {
-            Physics.Raycast(transform.position, player.position - transform.position, out RaycastHit hit, stats.detectionRange, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
-            if(hit.collider != null) isTargetOnViewRange = hit.collider.CompareTag("Player");
-            yield return null;
-        }
+      Physics.Raycast(transform.position, player.position - transform.position, out RaycastHit ray, stats.detectionRange, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+      return ray.collider != null ? ray.collider.CompareTag("Player") : false;
     }
-    public override void UpdateState() 
+
+    public bool CanSeePlayer(out RaycastHit hit)
     {
+        Physics.Raycast(transform.position, player.position - transform.position, out hit, stats.detectionRange, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+        return hit.collider != null ? hit.collider.CompareTag("Player") : false;
+    }
+
+    public override void ChangeState(EnemyState newState)
+    {
+        if (currentStateRoutine != null) StopCoroutine(currentStateRoutine);
+
+        State = newState;
+
         switch (State)
         {
             case EnemyState.Idle:
-                StartCoroutine(Idle());
+                currentStateRoutine = StartCoroutine(IdleState());
                 break;
             case EnemyState.Attacking:
-                StartCoroutine(Attack());
+                currentStateRoutine = StartCoroutine(AttackState());
                 break;
             case EnemyState.Dead:
-                PlayerOutOfDetectionRangeEvent();
+                StartCoroutine(DeathState());
                 break;
         }
     }
 
+    public override IEnumerator DeathState()
+    {
+        yield return null;
+    }
 }

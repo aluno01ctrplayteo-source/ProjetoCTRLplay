@@ -119,7 +119,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual IEnumerator Death()
+        public virtual IEnumerator DeathState()
         {
             yield return null; // to implement basic logic
         }
@@ -139,25 +139,19 @@ namespace StandardEnemyAIBehaviour
         public GameObject dropPrefab;
         public Transform projectileOrigin;
         public GameObject projectile;
-
+        public float projectileLifeTime = 20f;
         public List<GameObject> projectileAmount;
+        protected Coroutine currentStateRoutine;
         protected EnemyState _enemyState = EnemyState.Idle;
-        protected EnemyState State { get{ return _enemyState; } set { _enemyState = value; OnStateUpdate?.Invoke(); } }
-        public bool isDead = false;
-        public bool isAttacking = false;
-        public bool isTargetOnViewRange = false;
+        public EnemyState State { get{ return _enemyState; } set { if (_enemyState == value) return ; _enemyState = value; OnStateUpdate?.Invoke(); } }
         public int MaxHealth { get { return stats.maxHealth; } }
         public int MinHealth { get { return stats.minHealth; } }
         protected int _currentHealth = 100;
         public int CurrentHealth { get { return _currentHealth; } set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
 
         protected event Action OnTakeDamage;
-        protected event Action OnPlayerDetection;
-        protected event Action OnPlayerOutOfDetectionRange;
         protected event Action OnStateUpdate;
-
-
-
+        protected event Func<Transform> OnProjectileShot;
         [Header("Components")]
         public Animator anim;
         public RangedEnemiesStats stats;
@@ -178,35 +172,38 @@ namespace StandardEnemyAIBehaviour
             player = GameObject.FindWithTag("Player").transform;
 
         }
-
-        private void OnEnable()
-        {
-            OnPlayerDetection += () => { isTargetOnViewRange = true; };
-            OnPlayerOutOfDetectionRange += () => { isTargetOnViewRange = false; };
-        }
-
-
-
-        protected void PlayerDetectionEvent() => OnPlayerDetection?.Invoke();
-        protected void PlayerOutOfDetectionRangeEvent() => OnPlayerOutOfDetectionRange?.Invoke();
         protected void TakeDamageEvent() => OnTakeDamage?.Invoke();
+        protected Transform ProjectileShotEvent() => OnProjectileShot?.Invoke();
 
         public virtual IEnumerator TakeHitboxDamage(HitBox hitbox)
         {
             throw new NotImplementedException();
         }
 
-        protected virtual IEnumerator ProjectileBehaviour(GameObject pr)
+        protected virtual IEnumerator ProjectileBehaviour(GameObject pr, HitBox prhb)
         {
-            while (pr != null)
+            float lifeTime = projectileLifeTime;
+            while (pr != null && lifeTime > 0)
             {
                 pr.transform.Translate(pr.transform.forward * 5 * Time.deltaTime, Space.World);
+                if ( Physics.CheckBox(pr.transform.position, prhb.trigger.bounds.extents, pr.transform.rotation, LayerMask.GetMask("Scenario"), QueryTriggerInteraction.Ignore))
+                {
+                    StartCoroutine(prhb.DestroyH());
+                    yield break;
+                }
+                lifeTime -= Time.deltaTime;
                 yield return null;
-            }   
+            }
+
+            StartCoroutine(prhb.DestroyH());
         }
 
-        public virtual void UpdateState()
+        public virtual void ChangeState(EnemyState newState)
         {
+            if (currentStateRoutine != null) StopCoroutine(currentStateRoutine);
+
+            State = newState;
+
             switch (State)
             {
                 case EnemyState.Idle:
@@ -214,6 +211,7 @@ namespace StandardEnemyAIBehaviour
                 case EnemyState.Attacking:
                     break;
                 case EnemyState.Dead:
+                    StartCoroutine(DeathState());
                     break;
             }
         }
@@ -227,7 +225,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerator Death()
+        public virtual IEnumerator DeathState()
         {
             yield return null;
         }
