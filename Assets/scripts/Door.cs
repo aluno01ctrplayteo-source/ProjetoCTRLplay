@@ -13,6 +13,9 @@ public class Door : MonoBehaviour
     public float openSpeed = .2f;
     public float distance = 1.0f;
     private Vector3 _targetpos;
+    public DoorState currentState;
+    public Coroutine currentStateRoutine;
+
     private void Awake()
     {
         _initPos = transform.position;
@@ -22,10 +25,9 @@ public class Door : MonoBehaviour
 
 
 
-    public IEnumerator DoorOpen()
+    private IEnumerator Opening()
     {
         if (isOpen) yield break;
-        isOpen = true;
         _cameraManager.StartCoroutine(_cameraManager.ShakeCamera(timeUntilComplete, 0.1f, false));
         for (float t = 0; t < timeUntilComplete; t += Time.deltaTime) 
         {
@@ -34,6 +36,29 @@ public class Door : MonoBehaviour
             transform.Rotate(Vector3.up, rotationAmount * Time.deltaTime);
             yield return null;
         }
-        
     }
+
+    
+    public void UpdateState(DoorState state)
+    {
+        if (currentState == state) return;
+        if (currentStateRoutine != null) StopCoroutine(currentStateRoutine);
+
+        switch(state)
+        {
+            case DoorState.Open:
+                currentStateRoutine = StartCoroutine(Opening());
+                break;
+            case DoorState.Closed:
+                // nothing for now 
+                break;
+        }
+
+    }
+
+}
+public enum DoorState
+{
+    Closed,
+    Open
 }

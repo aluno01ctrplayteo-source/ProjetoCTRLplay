@@ -9,6 +9,9 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using static UnityEngine.Rendering.DebugUI;
 using System.Linq;
+using System.ComponentModel;
+using System.Diagnostics;
+
 [RequireComponent(typeof(Rigidbody))]
 [Icon("Assets/icons/player_icon.png")]
 public class Player : MonoBehaviour, IDamageable
@@ -21,12 +24,24 @@ public class Player : MonoBehaviour, IDamageable
     public Vector2 velocity; // Vetor 2D que armazena a entrada de movimento (x = lateral, y = frente/tr�s)
     public Vector3 desired;
     public Vector3 direction;
-
+    public bool isSprinting;
+    public float sprintMultiplier = 1.3f;
+    public float staminaConsumerMultiplier = 20;
+    public float staminaRecoveryMultiplier = 5;
+    [SerializeField]
+    private float maxStamina = 100;
+    public float MaxStamina { get { return maxStamina; } set { maxStamina = value; UpdateUI(); } }
+    [SerializeField]
+    private float minStamina = 0;
+    public float MinStamina { get { return minStamina; } set { minStamina = value; UpdateUI(); } }
+    [SerializeField]
+    private float stamina = 100f;
+    public float Stamina { get { return stamina; } set { stamina = Mathf.Clamp(value, minStamina, maxStamina); UpdateUI(); } }
 
     [Header("Pulo")]
     public float jumpForce = 5f; // "Força" do pulo é aqui sendo usada como altura desejada na fórmula física
     public bool isGrounded; // Flag que indica se o jogador está no chão
-    public bool airBorneTransition = false;
+    public bool airBorneTransition = false; // Flag que indica que o jogador esta indo pular
 
     [Header("Componentes")]
     public Animator playerAnimations; // Referência ao Animator
@@ -38,6 +53,7 @@ public class Player : MonoBehaviour, IDamageable
 
     [Header("UI")]
     public Slider hpBar;
+    public Slider staminaBar;
     public Slider basicAttackCooldownBar;
 
 
@@ -45,21 +61,24 @@ public class Player : MonoBehaviour, IDamageable
     public float attackCooldown = 1f; // Tempo de recarga entre ataques
     public bool canAttack = true; // Flag para controlar se o jogador pode atacar
     public bool isAttacking = false;
-    public bool slowdown = false;
+    public bool attackSlowness = false;
     public event Action OnTakeDamage;
     public event Action OnDeath;
     public bool isDead = false;
-    private int _maxHealth = 100;
     public bool tookDamage = false;
     public bool cancelAttack = false;
     public bool godMode = false;
     public bool waitForAttackEnd = false;
     public bool cancelAttackWhenDamaged = false;
-    public int MaxHealth { get { return _maxHealth; } set { _maxHealth = value; } }
-    private int _minHealth;
-    public int MinHealth { get { return _minHealth; } set { _minHealth = value; } }
-    private int _currentHealth = 100;
-    public int CurrentHealth { get { return _currentHealth; } set { if (!godMode) { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); UpdateUI(); } } }
+    [SerializeField] 
+    private int maxHealth = 100;
+    public int MaxHealth { get { return maxHealth; } set { maxHealth = value; UpdateUI(); } }
+    [SerializeField] 
+    private int minHealth;
+    public int MinHealth { get { return minHealth; } set { minHealth = value; UpdateUI(); } }
+    [SerializeField] 
+    private int currentHealth = 100;
+    public int CurrentHealth { get { return currentHealth; } set { if (!godMode) { currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); UpdateUI(); } } }
 
     private void Awake()
     {
@@ -89,16 +108,19 @@ public class Player : MonoBehaviour, IDamageable
         {
                            // indexes of each vertex
             new(0,0,0),   // 0
-            new(0,1,0),  // 1
-            new(1,1,0), // 2
-            new(1,0,0) // 3
+            new(0,1,5),  // 1
+            new(1,1,5), // 2
+            new(1,0,5), // 3
+            new(0,0,5)  // 4
         };
 
         int[] triangles = new int[]
         {
                     // I like to think these are indexes that form triangles using the vertices above
             0,1,2, // first triangle
-            0,2,3 // second triangle
+            0,2,3, // second triangle
+            0,4,1, // third triangle
+            0,3,4, // fourth triangle
         };
 
         m.vertices = vertices;
@@ -114,18 +136,27 @@ public class Player : MonoBehaviour, IDamageable
         ControllerInputs.Player.Move.performed += OnMove;
         ControllerInputs.Player.Move.canceled += OnMoveCanceled;
         ControllerInputs.Player.Pause.performed += OnPause;
-        ControllerInputs.Player.Inventory.performed += OnInventory;
         ControllerInputs.Player.Attack.performed += OnAttack;
+        ControllerInputs.Player.Sprint.performed += ctx => { StartCoroutine(Sprint()); };
+        ControllerInputs.Player.Sprint.canceled += ctx => { isSprinting = false; StartCoroutine(RecoverStamina()); };
         OnDeath += () => { isDead = true; ControllerInputs.Disable(); body.freezeRotation = false; };
 
-        OnTakeDamage += () => { if (isAttacking) cancelAttack = true; };
+        OnTakeDamage += () => { if (isAttacking)
+            {
+                playerAnimations.ResetTrigger("isAttacking");
+                playerAnimations.SetTrigger("damaged");
+
+                attackSlowness = false;
+                isAttacking = false;
+                canAttack = true;
+            } 
+        };
     }
 
     private void OnAttack(InputAction.CallbackContext ctx) => StartCoroutine(Attack());
     private void OnMove(InputAction.CallbackContext ctx) => velocity = ctx.ReadValue<Vector2>();
     private void OnMoveCanceled(InputAction.CallbackContext ctx) => velocity = Vector2.zero;
-    private void OnPause(InputAction.CallbackContext ctx) => GameManager.instance.ToggleMenu();
-    private void OnInventory(InputAction.CallbackContext ctx) => GameManager.instance.ToggleInventory();
+    private void OnPause(InputAction.CallbackContext ctx) => GameManager.instance.ToggleMenu(ctx);
     private void OnJump(InputAction.CallbackContext ctx) => Jump();
 
 
@@ -145,19 +176,39 @@ public class Player : MonoBehaviour, IDamageable
 
     }
 
+    public IEnumerator Sprint()
+    {
+        isSprinting = true;
+        moveSpeed *= sprintMultiplier;
+        while (isSprinting && Stamina != minStamina)
+        {
+            Stamina -= Time.deltaTime * staminaConsumerMultiplier;
+            yield return null;
+        }
+        moveSpeed /= sprintMultiplier;
+    }
 
+    public IEnumerator RecoverStamina()
+    {
+        yield return new WaitForSeconds(2);
+        while (!isSprinting && Stamina != maxStamina)
+        {
+            Stamina += Time.deltaTime * staminaRecoveryMultiplier;
+            yield return null;
+        }
+    }
 
 
     public void Jump()
     {
-        if (isGrounded && !slowdown) // S� permite pular se estiver no ch�o
+        if (isGrounded && !attackSlowness) // S� permite pular se estiver no ch�o
         {
             StartCoroutine(AirBorneTransition(.2f));
             body.AddForce(Vector3.up * jumpForce + transform.forward * 3, ForceMode.Impulse);
         } 
     }
 
-    public void Move()
+    public void MovementHandler()
     {
         if (isDead) return;
         Vector3 right = Vector3.ProjectOnPlane(orientation.right, Vector3.up);
@@ -167,55 +218,69 @@ public class Player : MonoBehaviour, IDamageable
         direction = forward * velocity.y + right * velocity.x;
         direction.Normalize();
 
-        if (slowdown) { direction /= 2; }
+        if (attackSlowness) { StartCoroutine(ApplyEfect("slowness", 0f, 1)); }
 
         if (velocity.magnitude > 0.1f) { playerAnimations.SetFloat("movementSpeed", Mathf.Lerp(playerAnimations.GetFloat("movementSpeed"), 1, 10 * Time.deltaTime)); }
         else if (velocity.magnitude < 0.1f) { playerAnimations.SetFloat("movementSpeed", Mathf.Lerp(playerAnimations.GetFloat("movementSpeed"), 0, 10 * Time.deltaTime)); }
         Vector3 current = body.velocity;
         desired = direction * moveSpeed - current;
 
-        ForceMode force = isGrounded ? ForceMode.VelocityChange : ForceMode.Impulse;
+        ForceMode force = isGrounded ? ForceMode.Impulse : ForceMode.Acceleration;
 
         body.AddForce(new Vector3(desired.x, 0f, desired.z), force);
     }
     public IEnumerator Attack()
     {
+        
         if (!canAttack) yield break;
 
-        slowdown = true;
+        attackSlowness = true;
         isAttacking = true;
         canAttack = false;
         
         playerAnimations.SetTrigger("isAttacking");
+
         StartCoroutine(CooldownUIHandler(basicAttackCooldownBar, animationClipLenghts["player_attack"] + attackCooldown));
         // Wait for animation to start
         yield return new WaitUntil(() =>
-            playerAnimations.GetCurrentAnimatorStateInfo(0).IsTag("player_attack"));
-
+        playerAnimations.GetCurrentAnimatorStateInfo(0).IsTag("player_attack"));
+            
         // Wait for animation to play
         while (playerAnimations.GetCurrentAnimatorStateInfo(0).IsTag("player_attack"))
         {
             if (cancelAttackWhenDamaged && cancelAttack)
             {
-                cancelAttack = false;
-                playerAnimations.ResetTrigger("isAttacking");
-                playerAnimations.SetTrigger("damaged");
 
-                slowdown = false;
-                isAttacking = false;
-                canAttack = true;
                 yield break;
             }
 
             yield return null;
         }
-        yield return StartCoroutine(CooldownHandler(attackCooldown));
+        yield return new WaitForSeconds(attackCooldown);
 
-        slowdown = false;
+        attackSlowness = false;
         isAttacking = false;
         
         canAttack = true;
     }
+    public IEnumerator ApplyEfect(string effect, float time, int level)
+    {
+        switch (effect)
+        {
+            case "slowness":
+                moveSpeed /= 2 * level;
+                for (float t = 0; t < time; t += Time.deltaTime)
+                {
+                    yield return null;
+                }
+                moveSpeed *= 2 * level;
+                break;
+            default: 
+                break;
+        }
+        yield return null;
+    }
+
 
     private IEnumerator CooldownUIHandler(Slider ui, float time)
     {
@@ -228,14 +293,6 @@ public class Player : MonoBehaviour, IDamageable
             yield return null;
         }
         ui.value = ui.maxValue;
-    }
-    private IEnumerator CooldownHandler(float time)
-    {
-        for (float t = 0; t < time;)
-        {
-            t += Time.deltaTime;
-            yield return null;
-        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -258,7 +315,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private void FixedUpdate()
     {
-        Move();
+        MovementHandler();
     }
 
     IEnumerator CheckGrounded() 
@@ -314,7 +371,12 @@ public class Player : MonoBehaviour, IDamageable
 
     public void UpdateUI()
     {
+        hpBar.maxValue = MaxHealth;
+        hpBar.minValue = MinHealth;
         hpBar.value = CurrentHealth;
+        staminaBar.maxValue = maxStamina;
+        staminaBar.minValue = minStamina;   
+        staminaBar.value = Stamina;
     }
 
     public IEnumerator TakeDirectDamage(int damage)

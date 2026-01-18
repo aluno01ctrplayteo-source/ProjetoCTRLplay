@@ -44,15 +44,15 @@ public class SaveSystem
 
 public class SaveData
 {
-    public readonly int _currency;
-    public readonly int _levelIndex;
-    public readonly Vector3 _playerPos;
-    public readonly List<Items> _inventoryItems;
-    public SaveData(int currency, int levelIndex, Vector3 playerPos, List<Items> inventoryItems)
+    public readonly int currency;
+    public readonly int levelBuildIndex;
+    public readonly List<Items> inventory;
+    public readonly Vector3 playerPos;
+    public SaveData(int currency, int levelBuildIndex, Vector3 playerPos, List<Items> inventory)
     {
-        _currency = currency;
-        _levelIndex = levelIndex;
-        _playerPos = playerPos;
-        _inventoryItems = inventoryItems;
+        this.currency = currency;
+        this.levelBuildIndex = levelBuildIndex;
+        this.playerPos = playerPos;
+        this.inventory = inventory;
     }
 }

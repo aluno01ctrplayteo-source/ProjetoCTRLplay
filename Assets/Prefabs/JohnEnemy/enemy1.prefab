@@ -87,14 +87,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3e78a860df77d843bc37cd12cbe7698, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  randomizeStatsOnStart: 0
+  enemyModel: {fileID: 6254443481399256250}
   dropPrefab: {fileID: 4778508348891477207, guid: 0b1baee37eda93d4caf77bb41ad7d77f,
     type: 3}
+  _maxHealth: 0
+  _currentHealth: 0
+  canMove: 1
+  isAttacking: 0
   isDead: 0
-  isGrounded: 0
-  impactResistance: 5
-  verticalVelocity: 0
-  gravity: -9.81
-  enemy: {fileID: 11400000, guid: 73addd901de45844b9e96279b57fbcb7, type: 2}
+  info: {fileID: 11400000, guid: 73addd901de45844b9e96279b57fbcb7, type: 2}
   agent: {fileID: 1304579450434903873}
   anim: {fileID: 821840194230740090}
 --- !u!195 &1304579450434903873
@@ -276,6 +278,9 @@ MonoBehaviour:
   trigger: {fileID: 2575132092769546019}
   owner: {fileID: 1304579450434903998}
   type: 1
+  destroyOnHit: 0
+  isDestroying: 0
+  destroyParticle: {fileID: 0}
   hitPlayer: 1
   impactForce: 50
   hitEnemy: 0

@@ -1,5 +1,5 @@
 {
-    "name": "Controlle",
+    "name": "Controller",
     "maps": [
         {
             "name": "Player",
@@ -51,18 +51,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Inventory",
+                    "name": "Attack",
                     "type": "Button",
-                    "id": "4ef76d17-52fd-4a9c-8e87-d2739aab2346",
+                    "id": "8bca13f8-496d-4564-a96a-35aeeb97ffc1",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Attack",
+                    "name": "Sprint",
                     "type": "Button",
-                    "id": "8bca13f8-496d-4564-a96a-35aeeb97ffc1",
+                    "id": "d13054fc-2149-4387-a278-484347ea2209",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -171,12 +171,12 @@
                 },
                 {
                     "name": "",
-                    "id": "4fb817a2-0fda-4820-acd3-4fcc43a5b6c9",
+                    "id": "383c50f2-6d98-418e-82d3-41027df3dd17",
                     "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Inventory",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -188,6 +188,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6e519ae6-5485-4536-b8be-0f1f4a88a19a",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

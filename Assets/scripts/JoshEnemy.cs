@@ -94,6 +94,7 @@ public class JoshEnemy : StandardRangedEnemy
     {
         CurrentHealth -= hitBox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
+        StartCoroutine(ProcDamageAnim());
         Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
         if (CurrentHealth == 0) 
         {
@@ -127,15 +128,21 @@ public class JoshEnemy : StandardRangedEnemy
                 break;
             case EnemyState.Attacking:
                 currentStateRoutine = StartCoroutine(AttackState());
-                break;
+                break;  
             case EnemyState.Dead:
-                StartCoroutine(DeathState());
+                currentStateRoutine = StartCoroutine(DeathState());
                 break;
         }
     }
 
     public override IEnumerator DeathState()
     {
+        anim.SetTrigger("death");
+        gameManager.RaiseEnemyDeathEvent();
+        Instantiate(dropPrefab, transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(3f);
+        
+        Destroy(gameObject);
         yield return null;
     }
 }

@@ -9,6 +9,9 @@ public class EnemyZone : MonoBehaviour
     public Vector3 range = Vector3.one;
     public Door doorTrigger;
     public GameManager gameManager;
+    private List<Collider> _enemyMarker;
+    public List<Collider> EnemyMarker { get { return _enemyMarker; } set { _enemyMarker = value; enemyCount = _enemyMarker.Count; } }
+    
     public int enemyCount;
     private void Awake()
     {
@@ -16,17 +19,17 @@ public class EnemyZone : MonoBehaviour
     }
     public void BoxDetection()
     {
-       enemyCount = Physics.OverlapBox(transform.position, range, Quaternion.identity, LayerMask.GetMask("Enemy")).ToList().Count;
+        EnemyMarker = Physics.OverlapBox(transform.position, range, Quaternion.identity, LayerMask.GetMask("Enemy")).ToList();
     }
     private void OnEnable()
     {
-        gameManager.OnEnemyDeath += ZoneCleared;
+        gameManager.OnEnemyDeath += EnemyDefeated;
     }
 
-    private void ZoneCleared()
+    private void EnemyDefeated()
     {
         enemyCount--;
-        if (enemyCount <= 0) StartCoroutine(doorTrigger.DoorOpen());
+        if (enemyCount == 0) doorTrigger.UpdateState(DoorState.Open);
     }
 
     private void OnDrawGizmos()

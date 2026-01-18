@@ -20,8 +20,8 @@ public class ItemData : MonoBehaviour, IInteracted
         goldAmount = Random.Range(0, 21);
         for (int i = 0; i < itemDropCount; i++)
         {
-            int itemDrop = Random.Range(0, GameManager.instance.items.Count);
-            dropItems.Add(GameManager.instance.items[itemDrop]);
+            int itemDrop = Random.Range(0, GameManager.instance.everyItem.Count);
+            dropItems.Add(GameManager.instance.everyItem[itemDrop]);
             GameObject obj = Instantiate(itemdispprefab, contentInfo);
             Image itemimg = obj.GetComponent<Image>();
             itemimg.sprite = dropItems[i].itemIcon;
@@ -30,6 +30,7 @@ public class ItemData : MonoBehaviour, IInteracted
     }
     private void Update()
     {
+        Mathf.Cos( Time.deltaTime );
         lookingAtPouch = false;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 5f))
         {

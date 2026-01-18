@@ -12,6 +12,7 @@ public class Inventory : MonoBehaviour
     public Transform itemContent; // Parent transform for UI item display
     public Player player; // Reference to the player to acess player stats
     public GameObject inventoryItem; // Prefab for individual inventory item UI
+    public List<int> inventoryItemsID;
 
     void Awake()
     {
@@ -25,10 +26,12 @@ public class Inventory : MonoBehaviour
     public void AddItem(Items item)
     {
         inventory.Add(item); // Add item to inventory list
+        inventoryItemsID.Add(item.id);
     }
     public void RemoveItem(Items item)
     {
         inventory.Remove(item); // Remove item from inventory list
+        inventoryItemsID.Remove(item.id);
     }
     public void ListItems()
     {

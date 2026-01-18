@@ -73,18 +73,18 @@ public partial class @Controller: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Inventory"",
+                    ""name"": ""Attack"",
                     ""type"": ""Button"",
-                    ""id"": ""4ef76d17-52fd-4a9c-8e87-d2739aab2346"",
+                    ""id"": ""8bca13f8-496d-4564-a96a-35aeeb97ffc1"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""Sprint"",
                     ""type"": ""Button"",
-                    ""id"": ""8bca13f8-496d-4564-a96a-35aeeb97ffc1"",
+                    ""id"": ""d13054fc-2149-4387-a278-484347ea2209"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -193,12 +193,12 @@ public partial class @Controller: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""4fb817a2-0fda-4820-acd3-4fcc43a5b6c9"",
+                    ""id"": ""383c50f2-6d98-418e-82d3-41027df3dd17"",
                     ""path"": ""<Keyboard>/t"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Inventory"",
+                    ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -210,6 +210,17 @@ public partial class @Controller: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6e519ae6-5485-4536-b8be-0f1f4a88a19a"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -247,8 +258,8 @@ public partial class @Controller: IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Interaction = m_Player.FindAction("Interaction", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
-        m_Player_Inventory = m_Player.FindAction("Inventory", throwIfNotFound: true);
         m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
+        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -315,8 +326,8 @@ public partial class @Controller: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Interaction;
     private readonly InputAction m_Player_Pause;
-    private readonly InputAction m_Player_Inventory;
     private readonly InputAction m_Player_Attack;
+    private readonly InputAction m_Player_Sprint;
     public struct PlayerActions
     {
         private @Controller m_Wrapper;
@@ -326,8 +337,8 @@ public partial class @Controller: IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Interaction => m_Wrapper.m_Player_Interaction;
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
-        public InputAction @Inventory => m_Wrapper.m_Player_Inventory;
         public InputAction @Attack => m_Wrapper.m_Player_Attack;
+        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -352,12 +363,12 @@ public partial class @Controller: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
-            @Inventory.started += instance.OnInventory;
-            @Inventory.performed += instance.OnInventory;
-            @Inventory.canceled += instance.OnInventory;
             @Attack.started += instance.OnAttack;
             @Attack.performed += instance.OnAttack;
             @Attack.canceled += instance.OnAttack;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -377,12 +388,12 @@ public partial class @Controller: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
-            @Inventory.started -= instance.OnInventory;
-            @Inventory.performed -= instance.OnInventory;
-            @Inventory.canceled -= instance.OnInventory;
             @Attack.started -= instance.OnAttack;
             @Attack.performed -= instance.OnAttack;
             @Attack.canceled -= instance.OnAttack;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -416,7 +427,7 @@ public partial class @Controller: IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnInteraction(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
-        void OnInventory(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
     }
 }

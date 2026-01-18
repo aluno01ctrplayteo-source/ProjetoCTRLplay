@@ -8,7 +8,7 @@ public class MeleeEnemiesStats : ScriptableObject
 {
     public MeleeEnemiesStats myData;
     public string enemyName;
-    public float attackRange;
+    public float attackTriggerRangeMultiplier;
     public int damage;
     public float speed;
     public float detectionRange;

@@ -21,6 +21,7 @@ namespace StandardEnemyAIBehaviour
         protected float _defaultDetectionRange;
         protected float _detectionRange;
         protected int _damage;
+        public GameObject enemyModel;
         public GameObject dropPrefab;
         public int _maxHealth;
         
@@ -53,7 +54,7 @@ namespace StandardEnemyAIBehaviour
 
 
         [Header("Components")]
-        public MeleeEnemiesStats stats;
+        public MeleeEnemiesStats info;
         public NavMeshAgent agent;
         public Animator anim;
         internal GameManager gameManager;
@@ -68,16 +69,16 @@ namespace StandardEnemyAIBehaviour
         private void Start()
         {
             gameManager.RaiseEnemyCreationEvent();
-            _damage = stats.damage;
-            MinHealth = stats.minHealth;
-            MaxHealth = stats.maxHealth;
+            _damage = info.damage;
+            MinHealth = info.minHealth;
+            MaxHealth = info.maxHealth;
             CurrentHealth = MaxHealth;
-            _attackRange = stats.attackRange;
-            _defaultDetectionRange = stats.detectionRange;
+            _attackRange = info.attackTriggerRangeMultiplier;
+            _defaultDetectionRange = info.detectionRange;
             _detectionRange = _defaultDetectionRange;
-            moveSpeed = stats.speed;
+            moveSpeed = info.speed;
             agent.speed = moveSpeed;
-            _enemyName = stats.enemyName;
+            _enemyName = info.enemyName;
             if (randomizeStatsOnStart)
             {
                 System.Random rnd = new();
@@ -97,11 +98,27 @@ namespace StandardEnemyAIBehaviour
                 StartCoroutine(TakeHitboxDamage(hitBox));
             }
         }
-
-
+        
         public virtual IEnumerator TakeHitboxDamage(HitBox hitbox)
         {
             throw new NotImplementedException(); // to implement basic logic
+        }
+
+        public virtual IEnumerator ProcDamageAnim()
+        { // mainly used to create a visual clue of damage without an actual anim
+            //default : shake
+            Vector3 startPos = enemyModel.transform.localPosition;
+            for (float t = 0f; t < .2f; t += Time.deltaTime)
+            {
+                yield return new WaitUntil(() => { return !(gameManager.isPaused); });
+                float percentComplete = t / .2f;
+                float damp = 1 - percentComplete;
+                Vector3 pos = startPos;
+                pos += UnityEngine.Random.insideUnitSphere * .4f * damp;
+                enemyModel.transform.localPosition = pos;
+                yield return null;
+            }
+            enemyModel.transform.localPosition = startPos;
         }
 
         public virtual IEnumerator Attack()
@@ -139,6 +156,7 @@ namespace StandardEnemyAIBehaviour
         public GameObject dropPrefab;
         public Transform projectileOrigin;
         public GameObject projectile;
+        public GameObject enemyModel;
         public float projectileLifeTime = 20f;
         public List<GameObject> projectileAmount;
         protected Coroutine currentStateRoutine;
@@ -180,6 +198,22 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException();
         }
 
+        public virtual IEnumerator ProcDamageAnim()
+        { // mainly used to create a visual clue of damage without an actual anim
+            //default : shake
+            Vector3 startPos = enemyModel.transform.localPosition;
+            for (float t = 0f; t < .2f; t += Time.deltaTime)
+            {
+                yield return new WaitUntil(() => { return !(gameManager.isPaused); });
+                float percentComplete = t / .2f;
+                float damp = 1 - percentComplete;
+                Vector3 pos = startPos;
+                pos += UnityEngine.Random.insideUnitSphere * .4f * damp;
+                enemyModel.transform.localPosition = pos;
+                yield return null;
+            }
+            enemyModel.transform.localPosition = startPos;
+        }
         protected virtual IEnumerator ProjectileBehaviour(GameObject pr, HitBox prhb)
         {
             float lifeTime = projectileLifeTime;

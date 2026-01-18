@@ -12,7 +12,7 @@ public class JohnEnemy : StandardMeleeEnemy
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position, transform.forward * _attackRange);
+        Gizmos.DrawCube(transform.position + transform.forward, new Vector3(.5f, .5f, 1));
     }
     
     private void OnEnable()
@@ -20,6 +20,7 @@ public class JohnEnemy : StandardMeleeEnemy
         gameManager.OnEnemyDeath += () => { gameManager.killCount++; Debug.Log("Killed an enemy"); };
         OnPlayerDetection += () => { _detectionRange = _defaultDetectionRange * 1.1f; };
         OnPlayerOutOfDetectionRange += () => { _detectionRange = _defaultDetectionRange; };
+        OnTakeDamage += () => { StartCoroutine(ProcDamageAnim()); };
     }
 
 
@@ -50,8 +51,8 @@ public class JohnEnemy : StandardMeleeEnemy
     }
     public bool IsAttackTriggerOverriding(string tag, string layer)
     {
-        RaycastHit[] hit = new RaycastHit[10];
-        int hitCount = Physics.RaycastNonAlloc(transform.position, transform.forward, hit, _attackRange, LayerMask.GetMask(layer), QueryTriggerInteraction.Ignore);
+        Collider[] hit = new Collider[10];
+        int hitCount = Physics.OverlapBoxNonAlloc(transform.position + transform.forward, new Vector3(.5f,.5f,1), hit, Quaternion.identity, LayerMask.GetMask(layer), QueryTriggerInteraction.Ignore);
         if (hitCount == 0) return false;
         
         for (int i = 0; i < hitCount; i++)
@@ -122,7 +123,7 @@ public class JohnEnemy : StandardMeleeEnemy
         CurrentHealth += amount;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
     }
-
+        
     public override IEnumerator TakeHitboxDamage(HitBox hitbox)
     {
         if (hitbox.type != HitboxType.Damage) yield break;

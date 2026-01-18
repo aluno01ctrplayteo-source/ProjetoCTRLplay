@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Accessibility;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,6 +18,9 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     public bool isPaused;
     public GameObject pauseMenu;
+    [SerializeField]
+    private string currentMenuPath = null;
+    public string CurrentMenuPath {  get { return currentMenuPath; } private set { currentMenuPath = isPaused ? value : null; }  }
     public int currency = 0;
     public int killCount = 0;
     public GameObject torchLight;
@@ -24,7 +30,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameOverMenu;
     public GameObject inventoryMenu;
     public Texture2D cursorSprite;
-    public List<Items> items;
+    public List<Items> everyItem;
     public Player player;
     public event Action OnEnemyCreation;
     public event Action OnEnemyDeath;
@@ -43,6 +49,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            Debug.LogWarning("Another GameManager was found within this scene!");
             Destroy(gameObject);
         }
 
@@ -50,6 +57,10 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         OnEnemyCreation += () => { enemies = GameObject.FindGameObjectsWithTag("Enemy").ToList(); };
+    }
+    public void LoadScene(int scene)
+    {
+        SceneManager.LoadScene(scene);
     }
     public void RaiseEnemyDeathEvent() => OnEnemyDeath?.Invoke();
     public void RaiseEnemyCreationEvent()
@@ -97,14 +108,18 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        if (coinDisplay != null)
+        try
+        {
             initialCoinDisplayText = coinDisplay.text;
-        coinDisplay.text = $"{initialCoinDisplayText} -> {currency}";
-        if (pauseMenu == null) return;
-        pauseMenu.SetActive(false);
-        if (inventoryMenu == null) return;
-        inventoryMenu.SetActive(false);
-        InstantiateLightSources(torchLight);
+            coinDisplay.text = $"{initialCoinDisplayText} -> {currency}";
+            pauseMenu.SetActive(false);
+            inventoryMenu.SetActive(false);
+            InstantiateLightSources(torchLight);
+        }
+        catch (Exception e) 
+        {
+            Debug.Log(e);
+        }
     }
     public void ChangeCurrencyAmount(int amount)
     {
@@ -114,40 +129,35 @@ public class GameManager : MonoBehaviour
             coinDisplay.text = $"{initialCoinDisplayText} -> {currency}";
         }
     }
-    public void ToggleMenu()
+    public void ToggleMenu(InputAction.CallbackContext ctx)
     {
-        Debug.Log("Toggle Menu Called");
-        isPaused = !isPaused;
-        if (isPaused)
+        switch (ctx.control.path)
         {
-            pauseMenu.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            pauseMenu.SetActive(false);
-  
-            Time.timeScale = 1f;
-        }
-    }
-    public void ToggleInventory()
-    {
-        Debug.Log("Toggle Inventory Called");
-        isPaused = !isPaused;
-        if (isPaused)
-        {
-            inventoryMenu.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            inventoryMenu.SetActive(false);
-            Time.timeScale = 1f;
+            case "/Keyboard/escape":
+                if (CurrentMenuPath != null && CurrentMenuPath != ctx.control.path) { return; }
+                isPaused = !isPaused;
+                CurrentMenuPath = "/Keyboard/escape";
+                pauseMenu.SetActive(isPaused);
+                Time.timeScale = isPaused ? 0f : 1f;
+                Debug.Log(ctx.control.path);
+                break;
+            case "/Keyboard/t":
+                if (CurrentMenuPath != null && CurrentMenuPath != ctx.control.path) { return; }
+                isPaused = !isPaused;
+                CurrentMenuPath = "/Keyboard/t";
+                inventoryMenu.SetActive(isPaused);
+                Time.timeScale = isPaused ? 0f : 1f;
+                Debug.Log(ctx.control.path);
+                break;
+            default:
+                Debug.Log("what..?");
+                Debug.Log(ctx.control.path);
+                break;
         }
     }
     public void Quit()
     {
-        Application.Quit();
+        UnityEngine.Application.Quit();
     }
     public void Save()
     {
@@ -157,11 +167,10 @@ public class GameManager : MonoBehaviour
     public void Load()
     {
         SaveData data = saveSystem.Load();
-        if (data == null) return;
-        currency = data._currency;
-        if (SceneManager.GetActiveScene().buildIndex != data._levelIndex) SceneManager.LoadScene(data._levelIndex);
-        player.transform.position = data._playerPos;
-        inventory.inventory = data._inventoryItems;
+        if (SceneManager.GetActiveScene().buildIndex != data.levelBuildIndex) SceneManager.LoadScene(data.levelBuildIndex);
+        currency = data.currency;
+        player.transform.position = data.playerPos;
+        
     }
 }
 public interface IInteracted

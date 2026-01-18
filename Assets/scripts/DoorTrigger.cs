@@ -19,7 +19,7 @@ public class DoorTrigger : MonoBehaviour, IInteracted
     }
     public IEnumerator Interacted()
     {
-        StartCoroutine(door.DoorOpen());
+        door.UpdateState(DoorState.Open);
         if (!hasTranslation) yield break;
         for (float t = 0; t < timeUntilComplete; t += Time.deltaTime)
         {
