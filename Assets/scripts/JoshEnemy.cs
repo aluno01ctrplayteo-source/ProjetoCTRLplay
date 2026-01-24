@@ -90,7 +90,7 @@ public class JoshEnemy : StandardRangedEnemy
     }
 
 
-    public override IEnumerator TakeHitboxDamage(HitBox hitBox)
+    public override IEnumerator TakeDirectDamage(HitBox hitBox)
     {
         CurrentHealth -= hitBox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);

@@ -124,7 +124,7 @@ public class JohnEnemy : StandardMeleeEnemy
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
     }
         
-    public override IEnumerator TakeHitboxDamage(HitBox hitbox)
+    public override IEnumerator TakeDirectDamage(HitBox hitbox)
     {
         if (hitbox.type != HitboxType.Damage) yield break;
         TakeDamageEvent();

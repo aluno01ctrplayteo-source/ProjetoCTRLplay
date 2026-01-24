@@ -95,11 +95,11 @@ namespace StandardEnemyAIBehaviour
             if (other.transform.GetComponent<HitBox>() != null)
             {
                 HitBox hitBox = other.GetComponent<HitBox>();
-                StartCoroutine(TakeHitboxDamage(hitBox));
+                StartCoroutine(TakeDirectDamage(hitBox));
             }
         }
         
-        public virtual IEnumerator TakeHitboxDamage(HitBox hitbox)
+        public virtual IEnumerator TakeDirectDamage(HitBox hitbox)
         {
             throw new NotImplementedException(); // to implement basic logic
         }
@@ -126,7 +126,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual IEnumerator TakeDirectDamage(int damage)
+        public virtual IEnumerator TakeInternalDamage(int damage)
         {
             throw new NotImplementedException(); // to implement basic logic
         }
@@ -180,7 +180,7 @@ namespace StandardEnemyAIBehaviour
             if (other.transform.GetComponent<HitBox>() != null)
             {
                 HitBox hitBox = other.GetComponent<HitBox>();
-                StartCoroutine(TakeHitboxDamage(hitBox));
+                StartCoroutine(TakeDirectDamage(hitBox));
             }
         }
 
@@ -193,7 +193,7 @@ namespace StandardEnemyAIBehaviour
         protected void TakeDamageEvent() => OnTakeDamage?.Invoke();
         protected Transform ProjectileShotEvent() => OnProjectileShot?.Invoke();
 
-        public virtual IEnumerator TakeHitboxDamage(HitBox hitbox)
+        public virtual IEnumerator TakeDirectDamage(HitBox hitbox)
         {
             throw new NotImplementedException();
         }
@@ -249,7 +249,7 @@ namespace StandardEnemyAIBehaviour
                     break;
             }
         }
-        public virtual IEnumerator TakeDirectDamage(int damage)
+        public virtual IEnumerator TakeInternalDamage(int damage)
         {
             throw new NotImplementedException();
         }

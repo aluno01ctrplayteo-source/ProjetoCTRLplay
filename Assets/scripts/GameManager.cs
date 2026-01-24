@@ -19,8 +19,8 @@ public class GameManager : MonoBehaviour
     public bool isPaused;
     public GameObject pauseMenu;
     [SerializeField]
-    private string currentMenuPath = null;
-    public string CurrentMenuPath {  get { return currentMenuPath; } private set { currentMenuPath = isPaused ? value : null; }  }
+    private string currentMenuPath;
+    public string CurrentMenuPath { get { return currentMenuPath; } private set { currentMenuPath = isPaused ? value : "none"; } }
     public int currency = 0;
     public int killCount = 0;
     public GameObject torchLight;
@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Another GameManager was found within this scene!");
             Destroy(gameObject);
         }
-
+        CurrentMenuPath = "none";
     }
     private void OnEnable()
     {
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
         switch (ctx.control.path)
         {
             case "/Keyboard/escape":
-                if (CurrentMenuPath != null && CurrentMenuPath != ctx.control.path) { return; }
+                if (CurrentMenuPath != "none" && CurrentMenuPath != ctx.control.path) { break; }
                 isPaused = !isPaused;
                 CurrentMenuPath = "/Keyboard/escape";
                 pauseMenu.SetActive(isPaused);
@@ -142,7 +142,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log(ctx.control.path);
                 break;
             case "/Keyboard/t":
-                if (CurrentMenuPath != null && CurrentMenuPath != ctx.control.path) { return; }
+                if (CurrentMenuPath != "none" && CurrentMenuPath != ctx.control.path) { break; }
                 isPaused = !isPaused;
                 CurrentMenuPath = "/Keyboard/t";
                 inventoryMenu.SetActive(isPaused);

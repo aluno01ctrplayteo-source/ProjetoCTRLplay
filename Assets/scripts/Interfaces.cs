@@ -4,8 +4,8 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    IEnumerator TakeHitboxDamage(HitBox hitbox);
-    IEnumerator TakeDirectDamage(int damage);
+    IEnumerator TakeDirectDamage(HitBox hitbox);
+    IEnumerator TakeInternalDamage(int damage);
     void Heal(int amount);
     IEnumerator DeathState();
     int MaxHealth { get; }

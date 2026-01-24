@@ -16,7 +16,6 @@ using System.Diagnostics;
 [Icon("Assets/icons/player_icon.png")]
 public class Player : MonoBehaviour, IDamageable
 {
-    public static Player instance;
 
     [Header("Movimentação")]
     public float moveSpeed = 5f; // Velocidade de movimento horizontal do jogador
@@ -62,7 +61,8 @@ public class Player : MonoBehaviour, IDamageable
     public bool canAttack = true; // Flag para controlar se o jogador pode atacar
     public bool isAttacking = false;
     public bool attackSlowness = false;
-    public event Action OnTakeDamage;
+    public event Action OnTakeDirectDamage;
+    public event Action OnTakeInternalDamage;
     public event Action OnDeath;
     public bool isDead = false;
     public bool tookDamage = false;
@@ -79,12 +79,11 @@ public class Player : MonoBehaviour, IDamageable
     [SerializeField] 
     private int currentHealth = 100;
     public int CurrentHealth { get { return currentHealth; } set { if (!godMode) { currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); UpdateUI(); } } }
+    public Effects[] currentEffects = new Effects[Enum.GetValues(typeof(Effects)).Length];
 
     private void Awake()
     {
         animationClipLenghts = animationClips.ToDictionary((c) => c.name, (c) => c.length);
-        if (instance == null) { instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); }
         body.constraints = RigidbodyConstraints.FreezeRotation;
         ControllerInputs = new Controller(); // Instancia o objeto de Input Actions
         CurrentHealth = 100;
@@ -141,16 +140,21 @@ public class Player : MonoBehaviour, IDamageable
         ControllerInputs.Player.Sprint.canceled += ctx => { isSprinting = false; StartCoroutine(RecoverStamina()); };
         OnDeath += () => { isDead = true; ControllerInputs.Disable(); body.freezeRotation = false; };
 
-        OnTakeDamage += () => { if (isAttacking)
+        OnTakeDirectDamage += () => { 
+            if (isAttacking && cancelAttack && cancelAttackWhenDamaged)
             {
                 playerAnimations.ResetTrigger("isAttacking");
                 playerAnimations.SetTrigger("damaged");
+                StopCoroutine(Attack());
 
                 attackSlowness = false;
                 isAttacking = false;
                 canAttack = true;
-            } 
+            }
+            StartCoroutine(cameraManager.ShakeCamera(.4f, 0.1f, false));
+            StartCoroutine(ApplyEfect(Effects.Slowness, .4f));
         };
+        OnTakeInternalDamage += () => { };
     }
 
     private void OnAttack(InputAction.CallbackContext ctx) => StartCoroutine(Attack());
@@ -178,9 +182,10 @@ public class Player : MonoBehaviour, IDamageable
 
     public IEnumerator Sprint()
     {
+        if(Stamina == minStamina || velocity == Vector2.zero) yield break;
         isSprinting = true;
         moveSpeed *= sprintMultiplier;
-        while (isSprinting && Stamina != minStamina)
+        while (isSprinting && Stamina != minStamina && velocity != Vector2.zero)
         {
             Stamina -= Time.deltaTime * staminaConsumerMultiplier;
             yield return null;
@@ -218,14 +223,16 @@ public class Player : MonoBehaviour, IDamageable
         direction = forward * velocity.y + right * velocity.x;
         direction.Normalize();
 
-        if (attackSlowness) { StartCoroutine(ApplyEfect("slowness", 0f, 1)); }
+        if (attackSlowness) { StartCoroutine(ApplyEfect(Effects.Slowness, 0f, 1)); }
 
         if (velocity.magnitude > 0.1f) { playerAnimations.SetFloat("movementSpeed", Mathf.Lerp(playerAnimations.GetFloat("movementSpeed"), 1, 10 * Time.deltaTime)); }
         else if (velocity.magnitude < 0.1f) { playerAnimations.SetFloat("movementSpeed", Mathf.Lerp(playerAnimations.GetFloat("movementSpeed"), 0, 10 * Time.deltaTime)); }
         Vector3 current = body.velocity;
         desired = direction * moveSpeed - current;
 
-        ForceMode force = isGrounded ? ForceMode.Impulse : ForceMode.Acceleration;
+
+
+        ForceMode force = isGrounded ? ForceMode.VelocityChange : ForceMode.Acceleration;
 
         body.AddForce(new Vector3(desired.x, 0f, desired.z), force);
     }
@@ -244,15 +251,11 @@ public class Player : MonoBehaviour, IDamageable
         // Wait for animation to start
         yield return new WaitUntil(() =>
         playerAnimations.GetCurrentAnimatorStateInfo(0).IsTag("player_attack"));
+        StartCoroutine(ApplyEfect(Effects.Slowness, .5f));
             
         // Wait for animation to play
         while (playerAnimations.GetCurrentAnimatorStateInfo(0).IsTag("player_attack"))
         {
-            if (cancelAttackWhenDamaged && cancelAttack)
-            {
-
-                yield break;
-            }
 
             yield return null;
         }
@@ -263,19 +266,43 @@ public class Player : MonoBehaviour, IDamageable
         
         canAttack = true;
     }
-    public IEnumerator ApplyEfect(string effect, float time, int level)
+    public IEnumerator ApplyEfect(Effects effect, float time, int level)
     {
+        if(currentEffects[(int)effect] != 0) yield break;
         switch (effect)
         {
-            case "slowness":
+            case Effects.Slowness:
                 moveSpeed /= 2 * level;
+                currentEffects[(int)Effects.Slowness] = effect;
                 for (float t = 0; t < time; t += Time.deltaTime)
                 {
                     yield return null;
                 }
-                moveSpeed *= 2 * level;
+                currentEffects[(int)Effects.Slowness] = 0;
+                moveSpeed *= 2 * level; 
                 break;
             default: 
+                break;
+        }
+        yield return null;
+    }
+
+    public IEnumerator ApplyEfect(Effects effect, float time)
+    {
+        if (currentEffects[(int)effect] != 0) yield break;
+        switch (effect)
+        {
+            case Effects.Slowness:
+                moveSpeed /= 2;
+                currentEffects[(int)Effects.Slowness] = effect;
+                for (float t = 0; t < time; t += Time.deltaTime)
+                {
+                    yield return null;
+                }
+                currentEffects[(int)Effects.Slowness] = 0;
+                moveSpeed *= 2;
+                break;
+            default:
                 break;
         }
         yield return null;
@@ -303,7 +330,7 @@ public class Player : MonoBehaviour, IDamageable
             HitBox hb = other.transform.GetComponent<HitBox>();
             hb.ToggleTrigger();
             StartCoroutine(hb.DestroyH());
-            StartCoroutine(TakeHitboxDamage(hb));
+            StartCoroutine(TakeDirectDamage(hb));
             
         }
         if (other.CompareTag("Healer"))
@@ -333,17 +360,16 @@ public class Player : MonoBehaviour, IDamageable
         Gizmos.color = Color.yellow;
         Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
     }
-    public IEnumerator TakeHitboxDamage(HitBox hitbox)
+    public IEnumerator TakeDirectDamage(HitBox hitbox)
     {
         if (hitbox.type != HitboxType.Damage) yield break;
         if (tookDamage) yield break;
         
         
         tookDamage = true;
-        OnTakeDamage?.Invoke();
+        OnTakeDirectDamage?.Invoke();
         hitbox.ToggleTrigger();
         CurrentHealth -= hitbox.value;
-        StartCoroutine(cameraManager.ShakeCamera(.4f, 0.1f, false));
         if (hitbox.impactForce != 0)
         {
             StartCoroutine(AirBorneTransition(.3f));
@@ -379,7 +405,7 @@ public class Player : MonoBehaviour, IDamageable
         staminaBar.value = Stamina;
     }
 
-    public IEnumerator TakeDirectDamage(int damage)
+    public IEnumerator TakeInternalDamage(int damage)
     {
         CurrentHealth -= damage;
         yield return null;
@@ -388,4 +414,11 @@ public class Player : MonoBehaviour, IDamageable
             StartCoroutine(DeathState());
         }
     }
+}
+public enum Effects
+{
+    None,
+    Slowness,
+    Stun, // to implement 
+    Poison // to implement
 }

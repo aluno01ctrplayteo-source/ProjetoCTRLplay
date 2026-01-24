@@ -17557,7 +17557,7 @@ MonoBehaviour:
   attackCooldown: 0
   canAttack: 1
   isAttacking: 0
-  slowdown: 0
+  attackSlowness: 0
   isDead: 0
   tookDamage: 0
   cancelAttack: 0
@@ -17567,6 +17567,7 @@ MonoBehaviour:
   maxHealth: 100
   minHealth: 0
   currentHealth: 100
+  currentEffects: 00000000000000000000000000000000
 --- !u!54 &2072562391
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -18080,6 +18081,11 @@ PrefabInstance:
       propertyPath: inventoryMenu
       value: 
       objectReference: {fileID: 1631946065}
+    - target: {fileID: 6834192158063064181, guid: 960fb54485940d1499ffad2a008ce8c5,
+        type: 3}
+      propertyPath: currentMenuPath
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 6834192158063064181, guid: 960fb54485940d1499ffad2a008ce8c5,
         type: 3}
       propertyPath: everyItem.Array.size

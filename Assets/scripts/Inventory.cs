@@ -61,7 +61,7 @@ public class Inventory : MonoBehaviour
                 player.Heal(itemValue);
                 break;
             case ItemType.BadConsumable:
-                StartCoroutine(player.TakeDirectDamage(itemValue));
+                StartCoroutine(player.TakeInternalDamage(itemValue));
                 break;
         }
 
