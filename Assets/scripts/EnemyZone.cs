@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public class EnemyZone : MonoBehaviour
 {
@@ -36,4 +37,5 @@ public class EnemyZone : MonoBehaviour
     {
         Gizmos.DrawWireCube(transform.position, range);
     }
+    //functions are something like programming functions?
 }

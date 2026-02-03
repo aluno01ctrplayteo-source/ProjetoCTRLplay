@@ -13,6 +13,8 @@ public class Door : MonoBehaviour
     public float openSpeed = .2f;
     public float distance = 1.0f;
     private Vector3 _targetpos;
+    public int triggersToOpen = 3;
+    private int triggersActivated = 0;
     public DoorState currentState;
     public Coroutine currentStateRoutine;
 
@@ -36,6 +38,7 @@ public class Door : MonoBehaviour
             transform.Rotate(Vector3.up, rotationAmount * Time.deltaTime);
             yield return null;
         }
+        isOpen = true;
     }
 
     
@@ -47,7 +50,8 @@ public class Door : MonoBehaviour
         switch(state)
         {
             case DoorState.Open:
-                currentStateRoutine = StartCoroutine(Opening());
+                triggersActivated++;
+                if (triggersActivated == triggersToOpen) currentStateRoutine = StartCoroutine(Opening());
                 break;
             case DoorState.Closed:
                 // nothing for now 

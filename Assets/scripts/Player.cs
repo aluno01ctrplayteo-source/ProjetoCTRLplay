@@ -66,7 +66,6 @@ public class Player : MonoBehaviour, IDamageable
     public event Action OnDeath;
     public bool isDead = false;
     public bool tookDamage = false;
-    public bool cancelAttack = false;
     public bool godMode = false;
     public bool waitForAttackEnd = false;
     public bool cancelAttackWhenDamaged = false;
@@ -141,7 +140,7 @@ public class Player : MonoBehaviour, IDamageable
         OnDeath += () => { isDead = true; ControllerInputs.Disable(); body.freezeRotation = false; };
 
         OnTakeDirectDamage += () => { 
-            if (isAttacking && cancelAttack && cancelAttackWhenDamaged)
+            if (isAttacking && cancelAttackWhenDamaged)
             {
                 playerAnimations.ResetTrigger("isAttacking");
                 playerAnimations.SetTrigger("damaged");

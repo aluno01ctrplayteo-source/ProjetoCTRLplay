@@ -12,7 +12,7 @@ public class JohnEnemy : StandardMeleeEnemy
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawCube(transform.position + transform.forward, new Vector3(.5f, .5f, 1));
+        Gizmos.DrawSphere(transform.position + transform.forward, .5f);
     }
     
     private void OnEnable()
@@ -52,7 +52,7 @@ public class JohnEnemy : StandardMeleeEnemy
     public bool IsAttackTriggerOverriding(string tag, string layer)
     {
         Collider[] hit = new Collider[10];
-        int hitCount = Physics.OverlapBoxNonAlloc(transform.position + transform.forward, new Vector3(.5f,.5f,1), hit, Quaternion.identity, LayerMask.GetMask(layer), QueryTriggerInteraction.Ignore);
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position + transform.forward, .5f, hit, LayerMask.GetMask(layer), QueryTriggerInteraction.Ignore);
         if (hitCount == 0) return false;
         
         for (int i = 0; i < hitCount; i++)
