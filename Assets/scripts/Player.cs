@@ -27,6 +27,7 @@ public class Player : MonoBehaviour, IDamageable
     public float sprintMultiplier = 1.3f;
     public float staminaConsumerMultiplier = 20;
     public float staminaRecoveryMultiplier = 5;
+
     [SerializeField]
     private float maxStamina = 100;
     public float MaxStamina { get { return maxStamina; } set { maxStamina = value; UpdateUI(); } }
@@ -194,7 +195,11 @@ public class Player : MonoBehaviour, IDamageable
 
     public IEnumerator RecoverStamina()
     {
-        yield return new WaitForSeconds(2);
+        for (float t = 0; t < 2f; t += Time.deltaTime)
+        {
+            if(isSprinting) yield break;
+            yield return null;
+        }
         while (!isSprinting && Stamina != maxStamina)
         {
             Stamina += Time.deltaTime * staminaRecoveryMultiplier;
