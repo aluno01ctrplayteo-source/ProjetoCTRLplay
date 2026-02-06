@@ -17,7 +17,7 @@ public class JohnEnemy : StandardMeleeEnemy
     
     private void OnEnable()
     {
-        gameManager.OnEnemyDeath += () => { gameManager.killCount++; Debug.Log("Killed an enemy"); };
+        gameManager.OnEnemyDeath += (id) => { gameManager.killCount++; Debug.Log("Killed an enemy"); };
         OnPlayerDetection += () => { _detectionRange = _defaultDetectionRange * 1.1f; };
         OnPlayerOutOfDetectionRange += () => { _detectionRange = _defaultDetectionRange; };
         OnTakeDamage += () => { StartCoroutine(ProcDamageAnim()); };
@@ -25,7 +25,7 @@ public class JohnEnemy : StandardMeleeEnemy
 
 
 
-    public override IEnumerator Attack()
+    protected override IEnumerator Attack()
     {
         isAttacking = true;
         canMove = false;
@@ -65,10 +65,11 @@ public class JohnEnemy : StandardMeleeEnemy
            
         return false;
     }
-    public override IEnumerator DeathState()
+    protected override IEnumerator Death()
     {
+        if(isDead) yield break;
         isDead = true;
-        gameManager.RaiseEnemyDeathEvent();
+        gameManager.RaiseEnemyDeathEvent(new EnemyDeathContext(EntityID, gameObject, gameObject.GetComponent<Collider>()));
         anim.SetTrigger("isDying");
 
         yield return new WaitForSeconds(3f);
@@ -131,6 +132,6 @@ public class JohnEnemy : StandardMeleeEnemy
         CurrentHealth -= hitbox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
         Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");
-        if (CurrentHealth < 0.1f) StartCoroutine(DeathState());
+        if (CurrentHealth < 0.1f) StartCoroutine(Death());
     }
 }

@@ -11,7 +11,7 @@ public class JoshEnemy : StandardRangedEnemy
 
     public IEnumerator AttackState()
     {
-        int Attacking = 0;
+        bool attacking = false;
 
         void PointTowards(RaycastHit h, out bool pointingtowards)
         {
@@ -35,12 +35,12 @@ public class JoshEnemy : StandardRangedEnemy
 
         IEnumerator ShootProjectile()
         {
-            if (Interlocked.Exchange(ref Attacking, 1) == 1) yield break;
+            attacking = true;
             anim.SetTrigger("attack");
             yield return new WaitForSeconds(.3f);
             InstantiateProjectile();
             yield return new WaitForSeconds(stats.attackSpeed);
-            Interlocked.Exchange(ref Attacking, 0);
+            attacking = false;
         }
 
         while (State == EnemyState.Attacking)
@@ -52,9 +52,9 @@ public class JoshEnemy : StandardRangedEnemy
                 ChangeState(EnemyState.Idle);
                 yield break;
             }
-            if (b)
+            if (b && !attacking)
             {
-                StartCoroutine(ShootProjectile());
+                yield return ShootProjectile();
             }
             yield return null;
         }
@@ -130,15 +130,15 @@ public class JoshEnemy : StandardRangedEnemy
                 currentStateRoutine = StartCoroutine(AttackState());
                 break;  
             case EnemyState.Dead:
-                currentStateRoutine = StartCoroutine(DeathState());
+                currentStateRoutine = StartCoroutine(Death());
                 break;
         }
     }
 
-    public override IEnumerator DeathState()
+    protected override IEnumerator Death()
     {
         anim.SetTrigger("death");
-        gameManager.RaiseEnemyDeathEvent();
+        gameManager.RaiseEnemyDeathEvent(new EnemyDeathContext(EntityID, gameObject, gameObject.GetComponent<Collider>()));
         Instantiate(dropPrefab, transform.position, Quaternion.identity);
         yield return new WaitForSeconds(3f);
         

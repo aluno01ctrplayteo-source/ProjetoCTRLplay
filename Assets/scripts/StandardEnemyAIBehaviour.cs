@@ -7,29 +7,34 @@ using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using JetBrains.Annotations;
+using System.Runtime.CompilerServices;
 
 namespace StandardEnemyAIBehaviour
 {
-    public class StandardMeleeEnemy : MonoBehaviour , IDamageable, IEnemyMarker
+    public class StandardMeleeEnemy : MonoBehaviour, IDynamicEntity, IEnemyMarker
     {
         internal Transform player;
 
         [Header("Info")]
         public bool randomizeStatsOnStart = false;
-        protected string _enemyName;
+        private string _enemyName;
+        public string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
         protected float _attackRange;
         protected float _defaultDetectionRange;
         protected float _detectionRange;
+        private int _entityID;
+        public int EntityID { get { return _entityID; } }
         protected int _damage;
         public GameObject enemyModel;
         public GameObject dropPrefab;
-        public int _maxHealth;
-        
-        public int MaxHealth { get { return _maxHealth; } set { _maxHealth = value; } }
-        protected int _minHealth;
-        public int MinHealth { get { return _minHealth; } set { _minHealth = value; } }
-        public int _currentHealth;
-        public int CurrentHealth { get { return _currentHealth; } set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
+
+        private int _maxHealth;
+        public int MaxHealth { get { return _maxHealth; } protected set { _maxHealth = value; } }
+        private int _minHealth;
+        public int MinHealth { get { return _minHealth; } protected set { _minHealth = value; } }
+        private int _currentHealth;
+        public int CurrentHealth { get { return _currentHealth; } protected set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
 
         [Header("Movement")]
         protected float moveSpeed;
@@ -64,6 +69,7 @@ namespace StandardEnemyAIBehaviour
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
             agent = agent == null ? GetComponent<NavMeshAgent>() : agent;
             player = GameObject.FindWithTag("Player").transform;
+            _entityID = gameObject.GetInstanceID();
         }
 
         private void Start()
@@ -104,7 +110,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual IEnumerator ProcDamageAnim()
+        protected virtual IEnumerator ProcDamageAnim()
         { // mainly used to create a visual clue of damage without an actual anim
             //default : shake
             Vector3 startPos = enemyModel.transform.localPosition;
@@ -121,7 +127,7 @@ namespace StandardEnemyAIBehaviour
             enemyModel.transform.localPosition = startPos;
         }
 
-        public virtual IEnumerator Attack()
+        protected virtual IEnumerator Attack()
         {
             throw new NotImplementedException(); // to implement basic logic
         }
@@ -136,7 +142,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual IEnumerator DeathState()
+        protected virtual IEnumerator Death()
         {
             yield return null; // to implement basic logic
         }
@@ -148,24 +154,31 @@ namespace StandardEnemyAIBehaviour
             Dead
         }
     }
-    public class StandardRangedEnemy : MonoBehaviour, IDamageable, IEnemyMarker //Incomplete for now
+    public class StandardRangedEnemy : MonoBehaviour, IDynamicEntity, IEnemyMarker //Incomplete for now
     {
         internal Transform player;
 
         [Header("Info")]
-        public GameObject dropPrefab;
+        public GameObject dropPrefab;   
         public Transform projectileOrigin;
         public GameObject projectile;
         public GameObject enemyModel;
+        protected int _damage;
         public float projectileLifeTime = 20f;
         public List<GameObject> projectileAmount;
+        private string _enemyName;
+        public string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
+        private int _entityID;
+        public int EntityID { get { return _entityID; } }
         protected Coroutine currentStateRoutine;
         protected EnemyState _enemyState = EnemyState.Idle;
         public EnemyState State { get{ return _enemyState; } set { if (_enemyState == value) return ; _enemyState = value; OnStateUpdate?.Invoke(); } }
-        public int MaxHealth { get { return stats.maxHealth; } }
-        public int MinHealth { get { return stats.minHealth; } }
-        protected int _currentHealth = 100;
-        public int CurrentHealth { get { return _currentHealth; } set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
+        private int _maxHealth;
+        public int MaxHealth { get { return _maxHealth; } protected set { _maxHealth = value; } }
+        private int _minHealth;
+        public int MinHealth { get { return _minHealth; } protected set { _minHealth = value; } }
+        private int _currentHealth = 100;
+        public int CurrentHealth { get { return _currentHealth; } protected set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
 
         protected event Action OnTakeDamage;
         protected event Action OnStateUpdate;
@@ -188,7 +201,11 @@ namespace StandardEnemyAIBehaviour
         {
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
             player = GameObject.FindWithTag("Player").transform;
-
+            _enemyName = stats.enemyName;
+            _damage = stats.damage;
+            _minHealth = stats.minHealth;
+            _maxHealth = stats.maxHealth;
+            _entityID = gameObject.GetInstanceID();
         }
         protected void TakeDamageEvent() => OnTakeDamage?.Invoke();
         protected Transform ProjectileShotEvent() => OnProjectileShot?.Invoke();
@@ -245,7 +262,7 @@ namespace StandardEnemyAIBehaviour
                 case EnemyState.Attacking:
                     break;
                 case EnemyState.Dead:
-                    StartCoroutine(DeathState());
+                    StartCoroutine(Death());
                     break;
             }
         }
@@ -259,7 +276,7 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerator DeathState()
+        protected virtual IEnumerator Death()
         {
             yield return null;
         }

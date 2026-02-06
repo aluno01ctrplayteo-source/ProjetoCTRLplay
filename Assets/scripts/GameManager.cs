@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
     public List<Items> everyItem;
     public Player player;
     public event Action OnEnemyCreation;
-    public event Action OnEnemyDeath;
+    public event Action<EnemyDeathContext> OnEnemyDeath;
     public Inventory inventory;
 
 
@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        
+
         if (instance == null)
         {
             instance = this;
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(scene);
     }
-    public void RaiseEnemyDeathEvent() => OnEnemyDeath?.Invoke();
+    public void RaiseEnemyDeathEvent(EnemyDeathContext context) => OnEnemyDeath?.Invoke(context);
     public void RaiseEnemyCreationEvent()
     {
         OnEnemyCreation?.Invoke();
@@ -75,15 +75,16 @@ public class GameManager : MonoBehaviour
         Color c1 = new(1, 1, 1, 0);
         Color c2 = new(0, 0, 0, 0);
 
-        while (c1.a <= 1 || c2.a <= 1) { 
+        while (c1.a <= 1 || c2.a <= 1)
+        {
             c1.a += .2f * Time.deltaTime;
-            g1.color = c1;  
+            g1.color = c1;
             if (c1.a >= .5f)
-            { 
-                c2.a += .3f * Time.deltaTime; 
-                g2.color = c2; 
-            } 
-            yield return null; 
+            {
+                c2.a += .3f * Time.deltaTime;
+                g2.color = c2;
+            }
+            yield return null;
         }
         yield return new WaitForSeconds(1);
         ReloadLevel();
@@ -116,7 +117,7 @@ public class GameManager : MonoBehaviour
             inventoryMenu.SetActive(false);
             InstantiateLightSources(torchLight);
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             Debug.Log(e);
         }
@@ -161,7 +162,7 @@ public class GameManager : MonoBehaviour
     }
     public void Save()
     {
-        SaveData data = new(currency,SceneManager.GetActiveScene().buildIndex ,player.transform.position , inventory.inventory);
+        SaveData data = new(currency, SceneManager.GetActiveScene().buildIndex, player.transform.position, inventory.inventory);
         saveSystem.Save(data);
     }
     public void Load()
@@ -170,7 +171,23 @@ public class GameManager : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex != data.levelBuildIndex) SceneManager.LoadScene(data.levelBuildIndex);
         currency = data.currency;
         player.transform.position = data.playerPos;
-        
+
+    }
+}
+namespace System.Runtime.CompilerServices
+{
+    internal static class IsExternalInit { }
+}
+public class EnemyDeathContext
+{
+    public int id;
+    public GameObject gameObject;
+    public Collider collider;
+    public EnemyDeathContext(int id, GameObject gameObject, Collider collider) 
+    {
+        this.id = id;
+        this.gameObject = gameObject;
+        this.collider = collider;
     }
 }
 public interface IInteracted

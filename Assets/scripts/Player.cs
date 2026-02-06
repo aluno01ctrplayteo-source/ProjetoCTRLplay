@@ -14,8 +14,11 @@ using System.Diagnostics;
 
 [RequireComponent(typeof(Rigidbody))]
 [Icon("Assets/icons/player_icon.png")]
-public class Player : MonoBehaviour, IDamageable
+public class Player : MonoBehaviour, IDynamicEntity
 {
+    public string EntityName { get; private set; } = "player";
+    private int _entityID;
+    public int EntityID { get { return _entityID; } private set => _entityID = value; }
 
     [Header("Movimentação")]
     public float moveSpeed = 5f; // Velocidade de movimento horizontal do jogador
@@ -66,6 +69,7 @@ public class Player : MonoBehaviour, IDamageable
     public event Action OnTakeInternalDamage;
     public event Action OnDeath;
     public bool isDead = false;
+    public float damage;
     public bool tookDamage = false;
     public bool godMode = false;
     public bool waitForAttackEnd = false;
@@ -88,6 +92,7 @@ public class Player : MonoBehaviour, IDamageable
         ControllerInputs = new Controller(); // Instancia o objeto de Input Actions
         CurrentHealth = 100;
         hpBar.value = CurrentHealth;
+        EntityID = gameObject.GetInstanceID();
         UpdateUI();
     }
 
@@ -385,9 +390,9 @@ public class Player : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.2f);
         tookDamage = false;
         if (CurrentHealth > 0.1f) yield break;
-        StartCoroutine(DeathState());
+        StartCoroutine(Death());
     }
-    public IEnumerator DeathState()
+    protected IEnumerator Death()
     {
         OnDeath?.Invoke();
         yield return null;
@@ -415,7 +420,7 @@ public class Player : MonoBehaviour, IDamageable
         yield return null;
         if (CurrentHealth <= 0)
         {
-            StartCoroutine(DeathState());
+            StartCoroutine(Death());
         }
     }
 }

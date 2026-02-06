@@ -10,32 +10,31 @@ public class EnemyZone : MonoBehaviour
     public Vector3 range = Vector3.one;
     public Door doorTrigger;
     public GameManager gameManager;
-    private List<Collider> _enemyMarker;
-    public List<Collider> EnemyMarker { get { return _enemyMarker; } set { _enemyMarker = value; enemyCount = _enemyMarker.Count; } }
-    
-    public int enemyCount;
-    private void Awake()
+    [SerializeField]private List<int> _enemyId = new();
+    private void Start()
     {
         BoxDetection();
     }
     public void BoxDetection()
     {
-        EnemyMarker = Physics.OverlapBox(transform.position, range, Quaternion.identity, LayerMask.GetMask("Enemy")).ToList();
+        _enemyId.Clear();
+        Collider[] enemyColliders = Physics.OverlapBox(transform.position, range, Quaternion.identity, LayerMask.GetMask("Enemy"));
+        _enemyId = enemyColliders.Select(collider => collider.gameObject.GetComponent<IDynamicEntity>().EntityID).ToList();
     }
     private void OnEnable()
     {
         gameManager.OnEnemyDeath += EnemyDefeated;
     }
 
-    private void EnemyDefeated()
+    private void EnemyDefeated(EnemyDeathContext context)
     {
-        enemyCount--;
-        if (enemyCount == 0) doorTrigger.UpdateState(DoorState.Open);
+        if (!_enemyId.Contains(context.id)) return;
+        _enemyId.Remove(context.id);
+        if (_enemyId.Count == 0) { enemiesDied = true; doorTrigger.UpdateState(DoorState.Open); }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position, range);
+        Gizmos.DrawWireCube(transform.position, range * 2);
     }
-    //functions are something like programming functions?
 }
