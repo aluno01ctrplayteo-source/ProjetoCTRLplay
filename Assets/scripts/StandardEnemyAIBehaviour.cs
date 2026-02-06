@@ -96,6 +96,12 @@ namespace StandardEnemyAIBehaviour
             anim.SetFloat("movement", 0);
         }
 
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(transform.position + Vector3.up * 5, 0.2f);
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             if (other.transform.GetComponent<HitBox>() != null)
@@ -187,6 +193,12 @@ namespace StandardEnemyAIBehaviour
         public Animator anim;
         public RangedEnemiesStats stats;
         internal GameManager gameManager;
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(transform.position + Vector3.up * 5, 0.2f);
+        }
 
         private void OnTriggerEnter(Collider other)
         {

@@ -7100,17 +7100,17 @@ PrefabInstance:
     - target: {fileID: 3028920253209647092, guid: e91cf76b1e1cf2347a196b649b4eaf55,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -10.79
+      value: -13.94
       objectReference: {fileID: 0}
     - target: {fileID: 3028920253209647092, guid: e91cf76b1e1cf2347a196b649b4eaf55,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.75
+      value: -1.04
       objectReference: {fileID: 0}
     - target: {fileID: 3028920253209647092, guid: e91cf76b1e1cf2347a196b649b4eaf55,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 109.85
+      value: 108.14
       objectReference: {fileID: 0}
     - target: {fileID: 3028920253209647092, guid: e91cf76b1e1cf2347a196b649b4eaf55,
         type: 3}
@@ -12000,7 +12000,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemiesDied: 0
   range: {x: 28, y: 12.5, z: 16.6}
-  doorTrigger: {fileID: 1612587432}
+  doorTrigger: {fileID: 865549735}
   gameManager: {fileID: 653466481}
   _enemyId: 
 --- !u!1 &1027554373 stripped
@@ -18390,7 +18390,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2072562387}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3, y: 4.1, z: 28.1}
+  m_LocalPosition: {x: 0.3, y: 4.1, z: 96.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

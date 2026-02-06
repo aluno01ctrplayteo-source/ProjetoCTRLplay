@@ -13,6 +13,15 @@ public class DoorTrigger : MonoBehaviour, IInteracted
     public float timeUntilComplete;
     private Vector3 _targetPos;
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, transform.position + translationDir * translationDistance);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(transform.position + Vector3.up * 5, 0.2f);
+
+    }
+
     private void Awake()
     {
         _targetPos = transform.position + translationDir * translationDistance;
