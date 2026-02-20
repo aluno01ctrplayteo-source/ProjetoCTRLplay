@@ -91,8 +91,6 @@ MonoBehaviour:
   enemyModel: {fileID: 6254443481399256250}
   dropPrefab: {fileID: 4778508348891477207, guid: 0b1baee37eda93d4caf77bb41ad7d77f,
     type: 3}
-  _maxHealth: 0
-  _currentHealth: 0
   canMove: 1
   isAttacking: 0
   isDead: 0
@@ -120,7 +118,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 3
+  m_ObstacleAvoidanceType: 2
 --- !u!136 &3353104777805663730
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -657,7 +655,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: -5374937057152016703, guid: 8203cd72e4dc62840b2b417402df733f, type: 3}
+  m_Mesh: {fileID: -5374937057152016703, guid: 664de55a73e931746a39ffa3a7db4c95, type: 3}
   m_Bones:
   - {fileID: 1311431621208536446}
   - {fileID: 2836831009680660195}
