@@ -1,28 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-public interface IDynamicEntity
+public abstract class DynamicEntity : MonoBehaviour
 {
-    string EntityName { get; }
-    int EntityID { get; }
-    public virtual IEnumerator TakeDirectDamage(HitBox hitbox)
+    public abstract string EntityName { get; protected set; }
+    public abstract int EntityID { get; }
+    public abstract IEnumerator TakeDirectDamage(HitBox hitbox);
+    public abstract IEnumerator TakeInternalDamage(int damage);
+    public abstract void Heal(int amount);
+    protected abstract IEnumerator Death();
+
+    public event Action<HitBox> OnTakeDamage;
+
+    public void TakeDamageEvent(HitBox hitbox)
     {
-        yield return null;
+        OnTakeDamage?.Invoke(hitbox);
     }
-    public virtual IEnumerator TakeInternalDamage(int damage)
-    {
-        yield return null;
-    }
-    public virtual void Heal(int amount)
-    {
-        return;
-    }
-    protected virtual IEnumerator Death()
-    {
-        yield return null;
-    }
+
     int MaxHealth { get; }
     int MinHealth { get; }
     int CurrentHealth { get; }

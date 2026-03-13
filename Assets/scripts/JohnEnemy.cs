@@ -20,7 +20,7 @@ public class JohnEnemy : StandardMeleeEnemy
         gameManager.OnEnemyDeath += (id) => { gameManager.killCount++; Debug.Log("Killed an enemy"); };
         OnPlayerDetection += () => { _detectionRange = _defaultDetectionRange * 1.1f; };
         OnPlayerOutOfDetectionRange += () => { _detectionRange = _defaultDetectionRange; };
-        OnTakeDamage += () => { StartCoroutine(ProcDamageAnim()); };
+        OnTakeDamage += (ctx) => { StartCoroutine(ProcDamageAnim()); StartCoroutine(TakeDirectDamage(ctx)); };
     }
 
 
@@ -127,8 +127,7 @@ public class JohnEnemy : StandardMeleeEnemy
         
     public override IEnumerator TakeDirectDamage(HitBox hitbox)
     {
-        if (hitbox.type != HitboxType.Damage) yield break;
-        TakeDamageEvent();
+        if (hitbox.type != HitBox.HitboxType.Damage) yield break;
         CurrentHealth -= hitbox.value;
         CurrentHealth = Mathf.Clamp(CurrentHealth, MinHealth, MaxHealth);
         Debug.Log($"Enemy: {gameObject}  Health: {CurrentHealth}");

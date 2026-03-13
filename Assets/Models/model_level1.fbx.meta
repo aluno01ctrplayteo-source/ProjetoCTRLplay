@@ -7,7 +7,7 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Dirt&Rock.003
+      name: Dirt&Rock
     second: {fileID: 2100000, guid: 19ae2a02e4b504043bf0043b43d32ec9, type: 2}
   - first:
       type: UnityEngine:Material
@@ -85,7 +85,7 @@ ModelImporter:
     strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
-    normalImportMode: 1
+    normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0

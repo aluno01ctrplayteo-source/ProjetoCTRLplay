@@ -7,6 +7,7 @@ using UnityEngine;
 public class RangedEnemiesStats : ScriptableObject
 {
     public RangedEnemiesStats myData;
+    public DynamicEntity script;
     public string enemyName;
     public float attackRange;
     public int damage;

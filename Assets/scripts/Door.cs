@@ -16,6 +16,7 @@ public class Door : MonoBehaviour
     public int triggersToOpen = 3;
     private int triggersActivated = 0;
     public DoorState currentState;
+    private OcclusionPortal occlusion;
     public Coroutine currentStateRoutine;
 
     private void Awake()
@@ -23,6 +24,8 @@ public class Door : MonoBehaviour
         _initPos = transform.position;
         _targetpos = transform.position + openDirection * distance;
         _cameraManager = FindObjectOfType<CameraManager>();
+        occlusion = GetComponent<OcclusionPortal>();
+        occlusion.open = false;
     }
 
 
@@ -30,6 +33,7 @@ public class Door : MonoBehaviour
     private IEnumerator Opening()
     {
         if (isOpen) yield break;
+        occlusion.open = true;
         _cameraManager.StartCoroutine(_cameraManager.ShakeCamera(timeUntilComplete, 0.1f, false));
         for (float t = 0; t < timeUntilComplete; t += Time.deltaTime) 
         {
@@ -38,6 +42,7 @@ public class Door : MonoBehaviour
             transform.Rotate(Vector3.up, rotationAmount * Time.deltaTime);
             yield return null;
         }
+        transform.position = _targetpos;
         isOpen = true;
     }
 

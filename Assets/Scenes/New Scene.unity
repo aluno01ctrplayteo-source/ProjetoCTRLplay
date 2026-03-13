@@ -134,7 +134,6 @@ GameObject:
   - component: {fileID: 32392868}
   - component: {fileID: 32392867}
   - component: {fileID: 32392866}
-  - component: {fileID: 32392865}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -142,20 +141,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
   m_IsActive: 1
---- !u!114 &32392865
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 32392864}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce2405957ae203849acfe375ac4c1de7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 0}
-  poolSize: 20
 --- !u!64 &32392866
 MeshCollider:
   m_ObjectHideFlags: 0

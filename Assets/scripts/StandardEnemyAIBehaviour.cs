@@ -12,19 +12,19 @@ using System.Runtime.CompilerServices;
 
 namespace StandardEnemyAIBehaviour
 {
-    public class StandardMeleeEnemy : MonoBehaviour, IDynamicEntity, IEnemyMarker
+    public class StandardMeleeEnemy : DynamicEntity, IEnemyMarker
     {
         internal Transform player;
 
         [Header("Info")]
         public bool randomizeStatsOnStart = false;
         private string _enemyName;
-        public string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
+        public override string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
         protected float _attackRange;
         protected float _defaultDetectionRange;
         protected float _detectionRange;
         private int _entityID;
-        public int EntityID { get { return _entityID; } }
+        public override int EntityID { get { return _entityID; } }
         protected int _damage;
         public GameObject enemyModel;
         public GameObject dropPrefab;
@@ -42,17 +42,14 @@ namespace StandardEnemyAIBehaviour
         public bool isAttacking = false;
         public bool isDead = false;
 
-        
-        
-        protected event Action OnTakeDamage;
+
+
         protected event Action OnPlayerDetection;
         protected event Action OnPlayerOutOfDetectionRange;
 
 
         protected void PlayerDetectionEvent() => OnPlayerDetection?.Invoke();
         protected void PlayerOutOfDetectionRangeEvent() => OnPlayerOutOfDetectionRange?.Invoke();
-
-        protected void TakeDamageEvent() => OnTakeDamage?.Invoke();
 
 
 
@@ -102,16 +99,8 @@ namespace StandardEnemyAIBehaviour
             Gizmos.DrawSphere(transform.position + Vector3.up * 5, 0.2f);
         }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.transform.GetComponent<HitBox>() != null)
-            {
-                HitBox hitBox = other.GetComponent<HitBox>();
-                StartCoroutine(TakeDirectDamage(hitBox));
-            }
-        }
-        
-        public virtual IEnumerator TakeDirectDamage(HitBox hitbox)
+
+        public override IEnumerator TakeDirectDamage(HitBox hitbox)
         {
             throw new NotImplementedException(); // to implement basic logic
         }
@@ -138,17 +127,17 @@ namespace StandardEnemyAIBehaviour
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual IEnumerator TakeInternalDamage(int damage)
+        public override IEnumerator TakeInternalDamage(int damage)
         {
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        public virtual void Heal(int amount)
+        public override void Heal(int amount)
         {
             throw new NotImplementedException(); // to implement basic logic
         }
 
-        protected virtual IEnumerator Death()
+        protected override IEnumerator Death()
         {
             yield return null; // to implement basic logic
         }
@@ -160,7 +149,7 @@ namespace StandardEnemyAIBehaviour
             Dead
         }
     }
-    public class StandardRangedEnemy : MonoBehaviour, IDynamicEntity, IEnemyMarker //Incomplete for now
+    public class StandardRangedEnemy : DynamicEntity, IEnemyMarker //Incomplete for now
     {
         internal Transform player;
 
@@ -173,9 +162,9 @@ namespace StandardEnemyAIBehaviour
         public float projectileLifeTime = 20f;
         public List<GameObject> projectileAmount;
         private string _enemyName;
-        public string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
+        public override string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
         private int _entityID;
-        public int EntityID { get { return _entityID; } }
+        public override int EntityID { get { return _entityID; } }
         protected Coroutine currentStateRoutine;
         protected EnemyState _enemyState = EnemyState.Idle;
         public EnemyState State { get{ return _enemyState; } set { if (_enemyState == value) return ; _enemyState = value; OnStateUpdate?.Invoke(); } }
@@ -186,7 +175,6 @@ namespace StandardEnemyAIBehaviour
         private int _currentHealth = 100;
         public int CurrentHealth { get { return _currentHealth; } protected set { _currentHealth = Mathf.Clamp(value, MinHealth, MaxHealth); } }
 
-        protected event Action OnTakeDamage;
         protected event Action OnStateUpdate;
         protected event Func<Transform> OnProjectileShot;
         [Header("Components")]
@@ -219,10 +207,9 @@ namespace StandardEnemyAIBehaviour
             _maxHealth = stats.maxHealth;
             _entityID = gameObject.GetInstanceID();
         }
-        protected void TakeDamageEvent() => OnTakeDamage?.Invoke();
         protected Transform ProjectileShotEvent() => OnProjectileShot?.Invoke();
 
-        public virtual IEnumerator TakeDirectDamage(HitBox hitbox)
+        public override IEnumerator TakeDirectDamage(HitBox hitbox)
         {
             throw new NotImplementedException();
         }
@@ -249,16 +236,16 @@ namespace StandardEnemyAIBehaviour
             while (pr != null && lifeTime > 0)
             {
                 pr.transform.Translate(pr.transform.forward * 5 * Time.deltaTime, Space.World);
-                if ( Physics.CheckBox(pr.transform.position, prhb.trigger.bounds.extents, pr.transform.rotation, LayerMask.GetMask("Scenario"), QueryTriggerInteraction.Ignore))
+                if ( Physics.CheckBox(pr.transform.position, prhb.size / 2, pr.transform.rotation, LayerMask.GetMask("Scenario"), QueryTriggerInteraction.Ignore))
                 {
-                    StartCoroutine(prhb.DestroyH());
+                    prhb.DestroyH();
                     yield break;
                 }
                 lifeTime -= Time.deltaTime;
                 yield return null;
             }
 
-            StartCoroutine(prhb.DestroyH());
+            prhb.DestroyH();
         }
 
         public virtual void ChangeState(EnemyState newState)
@@ -278,17 +265,17 @@ namespace StandardEnemyAIBehaviour
                     break;
             }
         }
-        public virtual IEnumerator TakeInternalDamage(int damage)
+        public override IEnumerator TakeInternalDamage(int damage)
         {
             throw new NotImplementedException();
         }
 
-        public virtual void Heal(int amount)
+        public override void Heal(int amount)
         {
             throw new NotImplementedException();
         }
 
-        protected virtual IEnumerator Death()
+        protected override IEnumerator Death()
         {
             yield return null;
         }

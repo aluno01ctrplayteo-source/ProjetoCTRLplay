@@ -14,11 +14,11 @@ using System.Diagnostics;
 
 [RequireComponent(typeof(Rigidbody))]
 [Icon("Assets/icons/player_icon.png")]
-public class Player : MonoBehaviour, IDynamicEntity
+public class Player : DynamicEntity
 {
-    public string EntityName { get; private set; } = "player";
+    public override string EntityName { get; protected set; } = "player";
     private int _entityID;
-    public int EntityID { get { return _entityID; } private set => _entityID = value; }
+    public override int EntityID { get { return _entityID; } }
 
     [Header("Movimentação")]
     public float moveSpeed = 5f; // Velocidade de movimento horizontal do jogador
@@ -92,7 +92,7 @@ public class Player : MonoBehaviour, IDynamicEntity
         ControllerInputs = new Controller(); // Instancia o objeto de Input Actions
         CurrentHealth = 100;
         hpBar.value = CurrentHealth;
-        EntityID = gameObject.GetInstanceID();
+        _entityID = gameObject.GetInstanceID();
         UpdateUI();
     }
 
@@ -337,8 +337,8 @@ public class Player : MonoBehaviour, IDynamicEntity
         if (other.transform.GetComponent<HitBox>() != null)
         {
             HitBox hb = other.transform.GetComponent<HitBox>();
-            hb.ToggleTrigger();
-            StartCoroutine(hb.DestroyH());
+            hb.SetActive(true);
+            hb.DestroyH();
             StartCoroutine(TakeDirectDamage(hb));
             
         }
@@ -369,15 +369,15 @@ public class Player : MonoBehaviour, IDynamicEntity
         Gizmos.color = Color.yellow;
         Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
     }
-    public IEnumerator TakeDirectDamage(HitBox hitbox)
+    public override IEnumerator TakeDirectDamage(HitBox hitbox)
     {
-        if (hitbox.type != HitboxType.Damage) yield break;
+        if (hitbox.type != HitBox.HitboxType.Damage) yield break;
         if (tookDamage) yield break;
         
         
         tookDamage = true;
         OnTakeDirectDamage?.Invoke();
-        hitbox.ToggleTrigger();
+        hitbox.SetActive(false);
         CurrentHealth -= hitbox.value;
         if (hitbox.impactForce != 0)
         {
@@ -392,14 +392,14 @@ public class Player : MonoBehaviour, IDynamicEntity
         if (CurrentHealth > 0.1f) yield break;
         StartCoroutine(Death());
     }
-    protected IEnumerator Death()
+    protected override IEnumerator Death()
     {
         OnDeath?.Invoke();
         yield return null;
         StartCoroutine(GameManager.instance.GameOver());
     }
 
-    public void Heal(int amount)
+    public override void Heal(int amount)
     {
         CurrentHealth += amount;
     }
@@ -414,7 +414,7 @@ public class Player : MonoBehaviour, IDynamicEntity
         staminaBar.value = Stamina;
     }
 
-    public IEnumerator TakeInternalDamage(int damage)
+    public override IEnumerator TakeInternalDamage(int damage)
     {
         CurrentHealth -= damage;
         yield return null;

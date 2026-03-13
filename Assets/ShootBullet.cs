@@ -18,23 +18,10 @@ public class ShootBullet : MonoBehaviour
     void Shoot()
     {
         GameObject bullet = bulletPool.GetBullet();
-        if(bullet != null)
-        {
+
             bullet.transform.position = transform.position;
             bullet.transform.rotation = transform.rotation;
             bullet.GetComponent<Rigidbody>().velocity = transform.forward * 20f;
-            float t = 0f;
-            while(t < 1f)
-            {
-                t += Time.deltaTime;
-                if (t >= 1f)
-                {
-                    bulletPool.ReturnBullet(bullet);
-                    break;
-                }
-            }
-            
-        }
     }
     void Update()
     {

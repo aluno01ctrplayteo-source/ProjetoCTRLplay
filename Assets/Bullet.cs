@@ -5,28 +5,27 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    private BulletPool bulletPool;
+    public BulletPool bulletPool;
 
-    public float time = 2f;
-    public float lifeTime = 0f;
+    public float lifeTime = 1f;
     private float timer = 0f;
 
+    private void Awake()
+    {
+        bulletPool = BulletPool.instance;
+    }
 
     void Counter()
     {
         timer += Time.deltaTime;
-        if(timer >= time)
+        if(timer >= lifeTime)
         {
-            gameObject.SetActive(false);
+            bulletPool.ReturnBullet(gameObject);
             timer = 0f;
         }
     }
     void Update()
     {
         Counter();
-    }
-    void OnDisable()
-    {
-        bulletPool.ReturnBullet(gameObject);
     }
 }

@@ -19,7 +19,7 @@ public class EnemyZone : MonoBehaviour
     {
         _enemyId.Clear();
         Collider[] enemyColliders = Physics.OverlapBox(transform.position, range, Quaternion.identity, LayerMask.GetMask("Enemy"));
-        _enemyId = enemyColliders.Select(collider => collider.gameObject.GetComponent<IDynamicEntity>().EntityID).ToList();
+        _enemyId = enemyColliders.Select(collider => collider.gameObject.GetComponent<DynamicEntity>().EntityID).ToList();
     }
     private void OnEnable()
     {
