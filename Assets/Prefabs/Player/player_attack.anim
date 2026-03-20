@@ -27742,14 +27742,14 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.625
-    functionName: CallFunc
+    functionName: Activate
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.7916667
-    functionName: CallFunc
+    functionName: DeActivate
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

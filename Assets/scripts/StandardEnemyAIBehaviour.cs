@@ -18,8 +18,7 @@ namespace StandardEnemyAIBehaviour
 
         [Header("Info")]
         public bool randomizeStatsOnStart = false;
-        private string _enemyName;
-        public override string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
+        public override string EntityName { get { return info.enemyName; } }
         protected float _attackRange;
         protected float _defaultDetectionRange;
         protected float _detectionRange;
@@ -67,10 +66,6 @@ namespace StandardEnemyAIBehaviour
             agent = agent == null ? GetComponent<NavMeshAgent>() : agent;
             player = GameObject.FindWithTag("Player").transform;
             _entityID = gameObject.GetInstanceID();
-        }
-
-        private void Start()
-        {
             gameManager.RaiseEnemyCreationEvent();
             _damage = info.damage;
             MinHealth = info.minHealth;
@@ -81,7 +76,7 @@ namespace StandardEnemyAIBehaviour
             _detectionRange = _defaultDetectionRange;
             moveSpeed = info.speed;
             agent.speed = moveSpeed;
-            _enemyName = info.enemyName;
+ 
             if (randomizeStatsOnStart)
             {
                 System.Random rnd = new();
@@ -161,8 +156,7 @@ namespace StandardEnemyAIBehaviour
         protected int _damage;
         public float projectileLifeTime = 20f;
         public List<GameObject> projectileAmount;
-        private string _enemyName;
-        public override string EntityName { get { return _enemyName; } protected set { _enemyName = value; } }
+        public override string EntityName { get { return stats.enemyName; } }
         private int _entityID;
         public override int EntityID { get { return _entityID; } }
         protected Coroutine currentStateRoutine;
@@ -201,7 +195,6 @@ namespace StandardEnemyAIBehaviour
         {
             gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
             player = GameObject.FindWithTag("Player").transform;
-            _enemyName = stats.enemyName;
             _damage = stats.damage;
             _minHealth = stats.minHealth;
             _maxHealth = stats.maxHealth;

@@ -23,11 +23,12 @@ public class EnemyPool : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        _enemy = enemies.ToDictionary(enemies => enemies.EntityName, enemies => enemies);
+        
 
     }
     private void Start()
     {
+        _enemy = enemies.ToDictionary(enemies => enemies.EntityName, enemies => enemies);
         foreach (var enemy in enemies)
         {
             string queueKey = enemy.EntityName;

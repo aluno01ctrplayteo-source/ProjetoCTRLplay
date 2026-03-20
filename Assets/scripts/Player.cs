@@ -16,7 +16,7 @@ using System.Diagnostics;
 [Icon("Assets/icons/player_icon.png")]
 public class Player : DynamicEntity
 {
-    public override string EntityName { get; protected set; } = "player";
+    public override string EntityName { get =>"Player"; }
     private int _entityID;
     public override int EntityID { get { return _entityID; } }
 
@@ -144,6 +144,9 @@ public class Player : DynamicEntity
         ControllerInputs.Player.Sprint.performed += ctx => { StartCoroutine(Sprint()); };
         ControllerInputs.Player.Sprint.canceled += ctx => { isSprinting = false; StartCoroutine(RecoverStamina()); };
         OnDeath += () => { isDead = true; ControllerInputs.Disable(); body.freezeRotation = false; };
+
+        OnHitBoxInteraction += (ctx) => { switch (ctx.type) { case HitBox.HitboxType.Damage: StartCoroutine(TakeDirectDamage(ctx)); break; } };
+
 
         OnTakeDirectDamage += () => { 
             if (isAttacking && cancelAttackWhenDamaged)
@@ -329,24 +332,6 @@ public class Player : DynamicEntity
             yield return null;
         }
         ui.value = ui.maxValue;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (isDead) return;
-        if (other.transform.GetComponent<HitBox>() != null)
-        {
-            HitBox hb = other.transform.GetComponent<HitBox>();
-            hb.SetActive(true);
-            hb.DestroyH();
-            StartCoroutine(TakeDirectDamage(hb));
-            
-        }
-        if (other.CompareTag("Healer"))
-        {
-            Heal(25);
-            Destroy(other.gameObject);
-        }
     }
 
     private void FixedUpdate()

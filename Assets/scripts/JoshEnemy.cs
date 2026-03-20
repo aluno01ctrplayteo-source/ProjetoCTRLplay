@@ -9,6 +9,11 @@ using System.Threading;
 public class JoshEnemy : StandardRangedEnemy
 {
 
+    private void OnEnable()
+    {
+        OnHitBoxInteraction += (h) => { StartCoroutine(ProcDamageAnim()); StartCoroutine(TakeDirectDamage(h)); };
+    }
+
     public IEnumerator AttackState()
     {
         bool attacking = false;
@@ -47,6 +52,7 @@ public class JoshEnemy : StandardRangedEnemy
         {
             bool canSeePlayer = CanSeePlayer(out RaycastHit hit);
             PointTowards(hit, out bool b);
+            
             if (!canSeePlayer) 
             {
                 ChangeState(EnemyState.Idle);

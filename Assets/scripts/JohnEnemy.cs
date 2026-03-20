@@ -20,7 +20,7 @@ public class JohnEnemy : StandardMeleeEnemy
         gameManager.OnEnemyDeath += (id) => { gameManager.killCount++; Debug.Log("Killed an enemy"); };
         OnPlayerDetection += () => { _detectionRange = _defaultDetectionRange * 1.1f; };
         OnPlayerOutOfDetectionRange += () => { _detectionRange = _defaultDetectionRange; };
-        OnTakeDamage += (ctx) => { StartCoroutine(ProcDamageAnim()); StartCoroutine(TakeDirectDamage(ctx)); };
+        OnHitBoxInteraction += (ctx) => { StartCoroutine(ProcDamageAnim()); StartCoroutine(TakeDirectDamage(ctx)); };
     }
 
 

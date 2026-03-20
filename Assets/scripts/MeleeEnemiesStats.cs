@@ -7,7 +7,6 @@ using UnityEngine;
 public class MeleeEnemiesStats : ScriptableObject
 {
     public MeleeEnemiesStats myData;
-    public DynamicEntity script;
     public string enemyName;
     public float attackTriggerRangeMultiplier;
     public int damage;
